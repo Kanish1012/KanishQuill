@@ -2,12 +2,53 @@ import { Link } from "react-router-dom";
 import InputBox from "../components/input.component";
 import googleIcon from "../imgs/google.png";
 import AnimationWrapper from "../common/page-animation";
+import { useRef } from "react";
+import { toast, Toaster } from "react-hot-toast";
 
 const UserAuthForm = ({ type }) => {
+    const authForm = useRef();
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+
+        let emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+        let passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,20}$/;
+
+        // formData
+        let form = new FormData(authForm.current);
+        let formData = {};
+
+        for (let [key, value] of form.entries()) {
+            formData[key] = value;
+        }
+
+        // form validation
+        let { fullname, email, password } = formData;
+        if (fullname) {
+            if (fullname.length < 3) {
+                return toast.error("Full name must be at least 3 letters long");
+            }
+        }
+
+        if (!email.length) {
+            return toast.error("Enter email");
+        }
+        if (!emailRegex.test(email)) {
+            return toast.error("Invalid email");
+        }
+
+        if (!passwordRegex.test(password)) {
+            return toast.error(
+                "Password must be 6-20 characters long and include a number, uppercase, and lowercase letter"
+            );
+        }
+    };
+
     return (
         <AnimationWrapper keyValue={type}>
             <section className="h-cover flex items-center justify-center">
-                <form className="w-[80%] max-w-[400px]">
+                <Toaster />
+                <form ref={authForm} className="w-[80%] max-w-[400px]">
                     <h1 className="text-4xl font-gelasio capitalize text-center mb-24">
                         {type == "sign-in" ? "Welcome back" : "Join Us today"}
                     </h1>
@@ -15,7 +56,7 @@ const UserAuthForm = ({ type }) => {
                     {/* Full name only for sign up page */}
                     {type != "sign-in" ? (
                         <InputBox
-                            name="full name"
+                            name="fullname"
                             type="text"
                             placeholder="Full Name"
                             icon="fi-rr-user"
@@ -40,7 +81,11 @@ const UserAuthForm = ({ type }) => {
                         icon="fi-rr-key"
                     />
 
-                    <button className="btn-dark center mt-14" type="submit">
+                    <button
+                        className="btn-dark center mt-14"
+                        type="submit"
+                        onClick={handleSubmit}
+                    >
                         {type.replace("-", " ")}
                     </button>
 
