@@ -113,6 +113,48 @@ server.post("/signup", (req, res) => {
     });
 });
 
+// Signin endpoint
+server.post("/signin", (req, res) => {
+    let { email, password } = req.body; // Extract email and password from request body
+
+    // Find the user by email in the database
+    User.findOne({ "personal_info.email": email })
+        .then((user) => {
+            if (!user) {
+                // If no user is found, send a 404 response
+                return res.status(404).json({ error: "Email not found" });
+            }
+
+            // Compare the provided password with the hashed password in the database
+            bcrypt.compare(
+                password,
+                user.personal_info.password,
+                (err, result) => {
+                    if (err) {
+                        // Handle error during password comparison
+                        return res.status(403).json({
+                            error: "Error occurred while logging in, please try again",
+                        });
+                    }
+
+                    if (!result) {
+                        // If the passwords do not match, return an error
+                        return res
+                            .status(403)
+                            .json({ error: "Invalid password" });
+                    } else {
+                        // If successful, format and send the user data with an access token
+                        return res.status(200).json(formatDatatoSend(user));
+                    }
+                }
+            );
+        })
+        .catch((err) => {
+            // Handle any server-side errors
+            return res.status(500).json({ error: err.message });
+        });
+});
+
 // Start the server
 server.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
