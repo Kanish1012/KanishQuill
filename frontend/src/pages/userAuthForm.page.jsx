@@ -4,12 +4,26 @@ import googleIcon from "../imgs/google.png";
 import AnimationWrapper from "../common/page-animation";
 import { useRef } from "react";
 import { toast, Toaster } from "react-hot-toast";
+import axios from "axios";
 
 const UserAuthForm = ({ type }) => {
     const authForm = useRef();
 
+    const userAuthThroughServer = (serverRoute, formData) => {
+        axios
+            .post(import.meta.env.VITE_SERVER_DOMAIN + serverRoute, formData)
+            .then(({ data }) => {
+                console.log(data);
+            })
+            .catch(({ response }) => {
+                toast.error(response.data.error);
+            });
+    };
+
     const handleSubmit = (e) => {
         e.preventDefault();
+
+        let serverRoute = type == "sign-in" ? "/signin" : "/signup";
 
         let emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
         let passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,20}$/;
@@ -42,6 +56,8 @@ const UserAuthForm = ({ type }) => {
                 "Password must be 6-20 characters long and include a number, uppercase, and lowercase letter"
             );
         }
+
+        userAuthThroughServer(serverRoute, formData);
     };
 
     return (
