@@ -1,6 +1,10 @@
 import express from "express";
 import mongoose from "mongoose";
 import "dotenv/config";
+import bcrypt from "bcrypt";
+
+//Schema
+import User from "./Schema/User.js";
 
 const server = express();
 let PORT = 3000;
@@ -34,7 +38,27 @@ server.post("/signup", (req, res) => {
         });
     }
 
-    return res.status(200).json({ status: "ok" });
+    bcrypt.hash(password, 10, (err, hashed_password) => {
+        let username = email.split("@")[0];
+        let user = new User({
+            personal_info: {
+                fullname,
+                email,
+                password: hashed_password,
+                username,
+            },
+        });
+        user.save()
+            .then((u) => {
+                return res.status(200).json({ user: u });
+            })
+            .catch((err) => {
+                if ((err.code = 11000)) {
+                    res.status(403).json({ error: "Email already exists" });
+                }
+                return res.status(500).json({ error: err.message });
+            });
+    });
 });
 
 server.listen(PORT, () => {
