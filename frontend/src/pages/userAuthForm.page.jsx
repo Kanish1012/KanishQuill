@@ -10,32 +10,39 @@ import { UserContext } from "../App";
 import { authWithGoogle } from "../common/firebase";
 
 const UserAuthForm = ({ type }) => {
+    // Destructure user authentication data and setter from UserContext
     let {
         userAuth: { access_token },
         setUserAuth,
     } = useContext(UserContext);
 
+    // Function to handle server communication for authentication
     const userAuthThroughServer = (serverRoute, formData) => {
         axios
             .post(import.meta.env.VITE_SERVER_DOMAIN + serverRoute, formData)
             .then(({ data }) => {
+                // Store user data in session and update context
                 storeInSession("user", JSON.stringify(data));
                 setUserAuth(data);
             })
             .catch(({ response }) => {
+                // Display error message on failure
                 toast.error(response.data.error);
             });
     };
 
+    // Form submission handler
     const handleSubmit = (e) => {
         e.preventDefault();
 
+        // Determine server route based on the form type
         let serverRoute = type == "sign-in" ? "/signin" : "/signup";
 
+        // Validation regex for email and password
         let emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
         let passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,20}$/;
 
-        // formData
+        // Extract form data
         let form = new FormData(formElement);
         let formData = {};
 
@@ -43,7 +50,7 @@ const UserAuthForm = ({ type }) => {
             formData[key] = value;
         }
 
-        // form validation
+        // Validate form fields
         let { fullname, email, password } = formData;
         if (fullname) {
             if (fullname.length < 3) {
@@ -66,9 +73,11 @@ const UserAuthForm = ({ type }) => {
             }
         }
 
+        // Send validated data to server
         userAuthThroughServer(serverRoute, formData);
     };
 
+    // Google authentication handler
     const handleGoogleAuth = (e) => {
         e.preventDefault();
         authWithGoogle()
@@ -77,14 +86,17 @@ const UserAuthForm = ({ type }) => {
                 let formData = {
                     access_token: user.accessToken,
                 };
+                // Send Google authentication data to server
                 userAuthThroughServer(serverRoute, formData);
             })
             .catch((err) => {
+                // Display error message for failed Google login
                 toast.error("Trouble logging in");
                 return console.log(err);
             });
     };
 
+    // Redirect authenticated user to home page
     return access_token ? (
         <Navigate to="/" />
     ) : (
@@ -92,11 +104,12 @@ const UserAuthForm = ({ type }) => {
             <section className="h-cover flex items-center justify-center">
                 <Toaster />
                 <form id="formElement" className="w-[80%] max-w-[400px]">
+                    {/* Heading */}
                     <h1 className="text-4xl font-gelasio capitalize text-center mb-24">
                         {type == "sign-in" ? "Welcome back" : "Join Us today"}
                     </h1>
 
-                    {/* Full name only for sign up page */}
+                    {/* Full name input, displayed only for sign-up */}
                     {type != "sign-in" ? (
                         <InputBox
                             name="fullname"
@@ -108,7 +121,7 @@ const UserAuthForm = ({ type }) => {
                         ""
                     )}
 
-                    {/* Email */}
+                    {/* Email input */}
                     <InputBox
                         name="email"
                         type="email"
@@ -116,7 +129,7 @@ const UserAuthForm = ({ type }) => {
                         icon="fi-rr-envelope"
                     />
 
-                    {/* Password */}
+                    {/* Password input */}
                     <InputBox
                         name="password"
                         type="password"
@@ -124,6 +137,7 @@ const UserAuthForm = ({ type }) => {
                         icon="fi-rr-key"
                     />
 
+                    {/* Submit button */}
                     <button
                         className="btn-dark center mt-14"
                         type="submit"
@@ -132,12 +146,14 @@ const UserAuthForm = ({ type }) => {
                         {type.replace("-", " ")}
                     </button>
 
+                    {/* Divider for alternate authentication options */}
                     <div className="relative w-full flex items-center gap-2 my-10 opacity-10 uppercase text-black font-bold">
                         <hr className="w-1/2 border-black" />
                         <p>or</p>
                         <hr className="w-1/2 border-black" />
                     </div>
 
+                    {/* Google authentication button */}
                     <button
                         className="btn-dark flex items-center justify-center gap-4 w-[90%] center"
                         onClick={handleGoogleAuth}
@@ -146,6 +162,7 @@ const UserAuthForm = ({ type }) => {
                         Continue with google
                     </button>
 
+                    {/* Toggle link between sign-in and sign-up */}
                     {type == "sign-in" ? (
                         <p className="mt-6 text-dark-grey text-xl text-center">
                             Don't have and account?
