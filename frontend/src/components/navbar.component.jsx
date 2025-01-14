@@ -2,6 +2,7 @@ import { useContext, useState } from "react";
 import logo from "../imgs/logo.png";
 import { Link, Outlet } from "react-router-dom";
 import { UserContext } from "../App";
+import UserNavigationPanel from "./user-navigation.component";
 
 const Navbar = () => {
     const [searchBoxVisibility, setSearchBoxVisibility] = useState(false);
@@ -71,6 +72,7 @@ const Navbar = () => {
                                         className="w-full h-full object-cover rounded-full"
                                     />
                                 </button>
+                                <UserNavigationPanel />
                             </div>
                         </>
                     ) : (
