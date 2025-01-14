@@ -1,16 +1,22 @@
-import express from "express";
+import express, { json } from "express";
 import mongoose from "mongoose";
 import "dotenv/config";
 import bcrypt from "bcrypt";
 import { nanoid } from "nanoid";
 import jwt from "jsonwebtoken";
 import cors from "cors";
+import admin from "firebase-admin";
+import serviceAccountKey from "./blog-website-kanish-firebase-adminsdk-ru7wg-389fd6b277.json" assert { type: "json" };
+import { getAuth } from "firebase-admin/auth";
 
 // Import User schema
 import User from "./Schema/User.js";
 
 const server = express();
 let PORT = 3000;
+admin.initializeApp({
+    credential: admin.credential.cert(serviceAccountKey),
+});
 
 // Email and password validation regex
 let emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
@@ -154,6 +160,65 @@ server.post("/signin", (req, res) => {
         .catch((err) => {
             // Handle any server-side errors
             return res.status(500).json({ error: err.message });
+        });
+});
+
+server.post("/google-auth", async (req, res) => {
+    let { access_token } = req.body;
+    getAuth()
+        .verifyIdToken(access_token)
+        .then(async (decodedUser) => {
+            let { email, name, picture } = decodedUser;
+            picture = picture.replace("s96-c", "s384-c");
+
+            let user = await User.findOne({
+                "personal_info.email": email,
+            })
+                .select(
+                    "personal_info.fullname personal_info.username personal_info.profile_img google_auth"
+                )
+                .then((u) => {
+                    return u || null;
+                })
+                .catch((err) => {
+                    return res.status(500).json({ error: err.message });
+                });
+
+            if (user) {
+                //login
+                if (!user.google_auth) {
+                    return res.status(403).json({
+                        error: "This email was signed up without google. Please log in with password to acess the account",
+                    });
+                }
+            } else {
+                //sign up
+                let username = await generateUsername(email);
+                user = new User({
+                    personal_info: {
+                        fullname: name,
+                        email,
+                        username,
+                    },
+                    google_auth: true,
+                });
+
+                await user
+                    .save()
+                    .then((u) => {
+                        user = u;
+                    })
+                    .catch((err) => {
+                        return res.status(500).json({ error: err.message });
+                    });
+            }
+
+            return res.status(200).json(formatDatatoSend(user));
+        })
+        .catch((err) => {
+            return res
+                .status(500)
+                .json({ error: "Failed to authenticate with goodle" });
         });
 });
 
