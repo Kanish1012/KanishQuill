@@ -57,10 +57,12 @@ const UserAuthForm = ({ type }) => {
             return toast.error("Invalid email");
         }
 
-        if (!passwordRegex.test(password)) {
-            return toast.error(
-                "Password must be 6-20 characters long and include a number, uppercase, and lowercase letter"
-            );
+        if (type == "sign-up") {
+            if (!passwordRegex.test(password)) {
+                return toast.error(
+                    "Password must be 6-20 characters long and include a number, uppercase, and lowercase letter"
+                );
+            }
         }
 
         userAuthThroughServer(serverRoute, formData);
