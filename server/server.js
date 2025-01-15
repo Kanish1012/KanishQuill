@@ -9,6 +9,7 @@ import admin from "firebase-admin";
 import serviceAccountKey from "./blog-website-kanish-firebase-adminsdk-ru7wg-389fd6b277.json" assert { type: "json" };
 import { getAuth } from "firebase-admin/auth";
 import User from "./Schema/User.js";
+import aws from "aws-sdk";
 
 const server = express();
 let PORT = 3000;
@@ -28,6 +29,13 @@ server.use(cors());
 mongoose.connect(process.env.DB_LOCATION, {
     autoIndex: true,
 });
+
+// Setting up AWS s3 bucket
+const s3 = new aws.S3({
+    region: 'eu-north-1',
+    accessKeyId: process.env.AWS_ACCESS_KEY,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+})
 
 // Format user data and generate access token
 const formatDatatoSend = (user) => {
@@ -132,7 +140,11 @@ server.post("/signin", (req, res) => {
                     }
                 );
             } else {
-                return res.status(403).json({ error: "Account is created with google, Try logging with Google" });
+                return res
+                    .status(403)
+                    .json({
+                        error: "Account is created with google, Try logging with Google",
+                    });
             }
         })
         .catch((err) => {
