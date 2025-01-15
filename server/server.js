@@ -32,10 +32,23 @@ mongoose.connect(process.env.DB_LOCATION, {
 
 // Setting up AWS s3 bucket
 const s3 = new aws.S3({
-    region: 'eu-north-1',
+    region: "eu-north-1",
     accessKeyId: process.env.AWS_ACCESS_KEY,
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-})
+});
+
+// Generate URL for image
+const generateUploadURL = async () => {
+    const date = new Date();
+    const imageName = `${nanoid()}-${date.getTime()}.jpeg`;
+
+    return await s3.getSignedUrlPromise("putObject", {
+        Bucket: process.env.AWS_BUCKET_NAME,
+        Key: imageName,
+        Expires: 1000,
+        ContentType: "image/jpeg",
+    });
+};
 
 // Format user data and generate access token
 const formatDatatoSend = (user) => {
@@ -62,6 +75,18 @@ const generateUsername = async (email) => {
     }
     return username;
 };
+
+// Upload image URL route
+server.get("/get-upload-url", (req, res) => {
+    generateUploadURL()
+        .then((url) => {
+            res.status(200).json({ uploadURL: url });
+        })
+        .catch((err) => {
+            console.log(err);
+            res.status(500).json({ message: "Error generating upload URL" });
+        });
+});
 
 // Signup endpoint
 server.post("/signup", (req, res) => {
@@ -140,11 +165,9 @@ server.post("/signin", (req, res) => {
                     }
                 );
             } else {
-                return res
-                    .status(403)
-                    .json({
-                        error: "Account is created with google, Try logging with Google",
-                    });
+                return res.status(403).json({
+                    error: "Account is created with google, Try logging with Google",
+                });
             }
         })
         .catch((err) => {
