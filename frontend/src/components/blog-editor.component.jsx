@@ -54,7 +54,7 @@ const BlogEditor = () => {
 
     // Prevent default behavior when Enter key is pressed in the title input
     const handleTitleKeyDown = (e) => {
-        if (e.key === 13) {
+        if (e.keyCode === 13) {
             e.preventDefault();
         }
     };
