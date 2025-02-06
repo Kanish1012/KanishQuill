@@ -14,30 +14,36 @@ const PublishForm = () => {
         setBlog,
     } = useContext(EditorContext);
 
+    // Close the publish form and return to the editor
     const handleCloseEvent = () => {
         setEditorState("editor");
     };
 
+    // Update blog title state when input changes
     const handleBlogTitleChange = (e) => {
         let input = e.target;
         setBlog({ ...blog, title: input.value });
     };
 
+    // Update blog description state when input changes
     const handleBlogDesChange = (e) => {
         let input = e.target;
         setBlog({ ...blog, des: input.value });
     };
 
+    // Prevent new lines in title input field
     const handleTitleKeyDown = (e) => {
         if (e.keyCode === 13) {
             e.preventDefault();
         }
     };
 
+    // Handle tag input and add to tags array when Enter (13) or Comma (188) is pressed
     const handleKeyDown = (e) => {
         if (e.keyCode == 13 || e.keyCode == 188) {
             e.preventDefault();
-            let tag = e.target.value;
+            let tag = e.target.value.trim(); // Trim spaces
+
             if (tags.length < tagLimit) {
                 if (!tags.includes(tag) && tag.length) {
                     setBlog({ ...blog, tags: [...tags, tag] });
@@ -53,6 +59,7 @@ const PublishForm = () => {
         <AnimationWrapper>
             <section className="w-screen min-h-screen grid items-center lg:grid-cols-2 py-16 lg:gap-4">
                 <Toaster />
+                {/* Close button */}
                 <button
                     className="w-12 h-12 absolute right-[5vw] z-10 top-[5%] lg:top-[10%]"
                     onClick={handleCloseEvent}
@@ -60,6 +67,7 @@ const PublishForm = () => {
                     <i className="fi fi-br-cross"></i>
                 </button>
 
+                {/* Blog preview section */}
                 <div className="max-w-[550] center">
                     <p className="text-dark-grey mb-1">Preview</p>
                     <div className="w-full aspect-video rounded-lg overflow-hidden bg-grey mt-4">
@@ -74,6 +82,7 @@ const PublishForm = () => {
                     </p>
                 </div>
 
+                {/* Blog details input section */}
                 <div className="border-grey lg:border-1 lg:pl-8">
                     <p className="text-dark-grey mb-2 mt-9">Blog Title</p>
                     <input
@@ -99,6 +108,7 @@ const PublishForm = () => {
                         {charcterLimit - des.length} characters left
                     </p>
 
+                    {/* Tag input and list */}
                     <p className="text-dark-grey mb-2 mt-9">
                         Topics - (Helps in searching and ranking your blog post)
                     </p>
@@ -111,6 +121,7 @@ const PublishForm = () => {
                             onKeyDown={handleKeyDown}
                         />
 
+                        {/* Render tags */}
                         {tags.map((tag, i) => {
                             return <Tag tag={tag} tagIndex={i} key={i} />;
                         })}
@@ -120,6 +131,7 @@ const PublishForm = () => {
                         {tagLimit - tags.length} Tags Left
                     </p>
 
+                    {/* Publish button */}
                     <button className="btn-dark px-8">Publish</button>
                 </div>
             </section>
