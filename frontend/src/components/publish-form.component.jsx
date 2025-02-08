@@ -3,16 +3,23 @@ import AnimationWrapper from "../common/page-animation";
 import { Toaster, toast } from "react-hot-toast";
 import { EditorContext } from "../pages/editor.pages";
 import Tag from "./tags.component";
+import axios from "axios";
+import { UserContext } from "../App";
+import { useNavigate } from "react-router-dom";
 
 const PublishForm = () => {
     let charcterLimit = 200;
     let tagLimit = 10;
     let {
         blog,
-        blog: { banner, title, tags, des },
+        blog: { banner, title, tags, des, content },
         setEditorState,
         setBlog,
     } = useContext(EditorContext);
+    let {
+        userAuth: { access_token },
+    } = useContext(UserContext);
+    let navigate = useNavigate();
 
     // Close the publish form and return to the editor
     const handleCloseEvent = () => {
@@ -53,6 +60,66 @@ const PublishForm = () => {
             }
             e.target.value = "";
         }
+    };
+
+    // Function to validate and publish the blog post to the server.
+    const publishBlog = (e) => {
+        if (e.target.className.includes("disable")) {
+            return;
+        }
+
+        if (!title.length) {
+            return toast.error("Please enter a title");
+        }
+
+        if (!des.length || des.length > charcterLimit) {
+            return toast.error(
+                `Write a description about your blog within ${charcterLimit} characters to publish`
+            );
+        }
+
+        if (!tags.length) {
+            return toast.error("Please add at least one tag to rank your blog");
+        }
+
+        let loadingToast = toast.loading("Publishing...");
+        e.target.classList.add("disable");
+
+        let blogObj = {
+            title,
+            banner,
+            des,
+            content,
+            tags,
+            draft: false,
+        };
+
+        axios
+            .post(
+                import.meta.env.VITE_SERVER_DOMAIN + "/create-blog",
+                blogObj,
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${access_token}`,
+                    },
+                }
+            )
+            .then(() => {
+                e.target.classList.remove("disable");
+                toast.dismiss(loadingToast);
+                toast.success("Blog Published Successfully");
+
+                setTimeout(() => {
+                    navigate("/");
+                }, 500);
+            })
+            .catch(({ response }) => {
+                e.target.classList.remove("disable");
+                toast.dismiss(loadingToast);
+
+                return toast.error(response.data);
+            });
     };
 
     return (
@@ -132,7 +199,9 @@ const PublishForm = () => {
                     </p>
 
                     {/* Publish button */}
-                    <button className="btn-dark px-8">Publish</button>
+                    <button className="btn-dark px-8" onClick={publishBlog}>
+                        Publish
+                    </button>
                 </div>
             </section>
         </AnimationWrapper>
