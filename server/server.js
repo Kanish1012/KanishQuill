@@ -9,6 +9,7 @@ import admin from "firebase-admin";
 import serviceAccountKey from "./blog-website-kanish-firebase-adminsdk-ru7wg-389fd6b277.json" assert { type: "json" };
 import { getAuth } from "firebase-admin/auth";
 import User from "./Schema/User.js";
+import Blog from "./Schema/Blog.js";
 import aws from "aws-sdk";
 
 const server = express();
@@ -241,8 +242,75 @@ server.post("/google-auth", async (req, res) => {
         );
 });
 
+// Endpoint to create a blog post with JWT authentication and validation.
 server.post("/create-blog", verifyJWT, (req, res) => {
-    return res.json(req.body);
+    let authorId = req.user;
+    let { title, des, banner, tags, content, draft } = req.body;
+
+    if (!title.length) {
+        return res.status(403).json({ error: "Title is required" });
+    }
+
+    if (!des.length || des.length > 200) {
+        return res.status(403).json({
+            error: "Description is required and should be less than 200 characters",
+        });
+    }
+
+    if (!banner.length) {
+        return res.status(403).json({ error: "Banner is required" });
+    }
+
+    if (!content || !content.blocks || !content.blocks.length) {
+        return res.status(403).json({ error: "Content is required" });
+    }
+
+    if (!tags || !tags.length || tags.length > 10) {
+        return res
+            .status(403)
+            .json({ error: "Tags are required and should be less than 10" });
+    }
+
+    tags = tags.map((tag) => tag.toLowerCase());
+
+    let blog_id =
+        title
+            .replace(/[^a-zA-Z0-9]/g, " ")
+            .replace(/\s+/g, "-")
+            .trim() + nanoid();
+
+    let blog = new Blog({
+        title,
+        des,
+        banner,
+        content,
+        tags,
+        author: authorId,
+        blog_id,
+        draft: Boolean(draft),
+    });
+    blog.save()
+        .then((blog) => {
+            let incrementVal = draft ? 0 : 1;
+            User.findOneAndUpdate(
+                { _id: authorId },
+                {
+                    $inc: { "account_info.total_posts": incrementVal },
+                    $push: { blogs: blog._id },
+                }
+            )
+                .then((user) => {
+                    return res.status(200).json({ id: blog.blog_id });
+                })
+                .catch((err) => {
+                    return res
+                        .status(500)
+                        .json({ error: "Failed to update total posts number" });
+                });
+        })
+        .catch((err) => {
+            return res.status(500).json({ error: err.message });
+        });
 });
 
 // Start the server
