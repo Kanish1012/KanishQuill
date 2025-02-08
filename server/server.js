@@ -50,6 +50,25 @@ const generateUploadURL = async () => {
     });
 };
 
+// Middleware function to verify the JSON Web Token (JWT) in the request header.
+const verifyJWT = (req, res, next) => {
+    const authHeader = req.headers["authorization"];
+    const token = authHeader && authHeader.split(" ")[1];
+
+    if (token == null) {
+        return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    jwt.verify(token, process.env.SECRET_ACCESS_KEY, (err, user) => {
+        if (err) {
+            return res.status(403).json({ message: "Access Token in invalid" });
+        }
+
+        req.user = user.id;
+        next();
+    });
+};
+
 // Format user data and generate access token
 const formatDatatoSend = (user) => {
     const access_token = jwt.sign(
@@ -220,6 +239,10 @@ server.post("/google-auth", async (req, res) => {
                 .status(500)
                 .json({ error: "Failed to authenticate with Google" })
         );
+});
+
+server.post("/create-blog", verifyJWT, (req, res) => {
+    return res.json(req.body);
 });
 
 // Start the server
