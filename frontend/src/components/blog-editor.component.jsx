@@ -22,14 +22,17 @@ const BlogEditor = () => {
 
     // Initialize the text editor on component mount
     useEffect(() => {
-        setTextEditor(
-            new EditorJS({
-                holder: "textEditor",
-                data: content,
-                tools: tools,
-                placeholder: "Let's write an awesome story",
-            })
-        );
+        if (!textEditor.isReady && !textEditor.initialized) {
+            setTextEditor(
+                new EditorJS({
+                    holder: "textEditor",
+                    data: content,
+                    tools: tools,
+                    placeholder: "Let's write an awesome story",
+                })
+            );
+            textEditor.initialized = true;
+        }
     }, []);
 
     // Handle banner image upload
