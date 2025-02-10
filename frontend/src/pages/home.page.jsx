@@ -1,8 +1,22 @@
+import AnimationWrapper from "../common/page-animation";
+import InPageNavigation from "../components/inpage-navigation.component";
+
 const HomePage = () => {
     return (
-        <div>
-            <h1>Home Page</h1>
-        </div>
+        <AnimationWrapper>
+            <section className="h-cover flex justify-center gap-10">
+                {/* latest blogs */}
+                <div className="w-full">
+                    <InPageNavigation routes={["home", "trending blogs"]} defaultHidden={["trending blogs"]}>
+                        <h1>latest blogs</h1>
+                        <h1>trending blogs</h1>
+                    </InPageNavigation>
+                </div>
+
+                {/* filters and trending blogs */}
+                <div></div>
+            </section>
+        </AnimationWrapper>
     );
 };
 
