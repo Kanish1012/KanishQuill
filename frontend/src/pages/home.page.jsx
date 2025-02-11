@@ -12,7 +12,7 @@ const HomePage = () => {
         axios
             .get(import.meta.env.VITE_SERVER_DOMAIN + "/latest-blogs")
             .then(({ data }) => {
-                setBlogs(data);
+                setBlogs(data.blogs);
             })
             .catch((err) => {
                 console.log(err);
