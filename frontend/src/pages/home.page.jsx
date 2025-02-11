@@ -7,6 +7,7 @@ import BlogPostCard from "../components/blog-post.component";
 
 const HomePage = () => {
     let [blogs, setBlogs] = useState(null);
+    let [trendingBlogs, setTrendingBlogs] = useState(null);
 
     const fetchLatestBlogs = () => {
         axios
@@ -19,8 +20,20 @@ const HomePage = () => {
             });
     };
 
+    const fetchTrendingBlogs = () => {
+        axios
+            .get(import.meta.env.VITE_SERVER_DOMAIN + "/trending-blogs")
+            .then(({ data }) => {
+                setTrendingBlogs(data.blogs);
+            })
+            .catch((err) => {
+                console.log(err);
+            });
+    };
+
     useEffect(() => {
         fetchLatestBlogs();
+        fetchTrendingBlogs();
     }, []);
     return (
         <AnimationWrapper>
@@ -44,13 +57,35 @@ const HomePage = () => {
                                             }}
                                             key={i}
                                         >
-                                            <BlogPostCard content={blog} author={blog.author.personal_info}/>
+                                            <BlogPostCard
+                                                content={blog}
+                                                author={
+                                                    blog.author.personal_info
+                                                }
+                                            />
                                         </AnimationWrapper>
                                     );
                                 })
                             )}
                         </>
-                        <h1>trending blogs</h1>
+
+                        {trendingBlogs == null ? (
+                            <Loader />
+                        ) : (
+                            trendingBlogs.map((blog, i) => {
+                                return (
+                                    <AnimationWrapper
+                                        transition={{
+                                            duration: 1,
+                                            delay: i * 0.1,
+                                        }}
+                                        key={i}
+                                    >
+                                        <MinimalBlogPost />
+                                    </AnimationWrapper>
+                                );
+                            })
+                        )}
                     </InPageNavigation>
                 </div>
 
