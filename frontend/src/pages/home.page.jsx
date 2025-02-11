@@ -9,6 +9,16 @@ import MinimalBlogPost from "../components/nobanner-blog-post.component";
 const HomePage = () => {
     let [blogs, setBlogs] = useState(null);
     let [trendingBlogs, setTrendingBlogs] = useState(null);
+    let categories = [
+        "programming",
+        "food",
+        "sports",
+        "social media",
+        "film",
+        "tech",
+        "finances",
+        "travel",
+    ];
 
     const fetchLatestBlogs = () => {
         axios
@@ -82,7 +92,10 @@ const HomePage = () => {
                                         }}
                                         key={i}
                                     >
-                                        <MinimalBlogPost blog={blog} index={i} />
+                                        <MinimalBlogPost
+                                            blog={blog}
+                                            index={i}
+                                        />
                                     </AnimationWrapper>
                                 );
                             })
@@ -91,7 +104,51 @@ const HomePage = () => {
                 </div>
 
                 {/* filters and trending blogs */}
-                <div></div>
+                <div className="min-w-[40%] lg:min-w-[400px] max-w-min border-l border-grey pl-8 pt-3 max-md:hidden">
+                    <div className="flex flex-col gap-10">
+                        <div>
+                            <h1 className="font-medium text-xl mb-8">
+                                Stories from all intrests
+                            </h1>
+                            <div className="flex gap-3 flex-wrap">
+                                {categories.map((category, i) => {
+                                    return (
+                                        <button className="tag" key={i}>
+                                            {category}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </div>
+
+                        <div>
+                            <h1 className="font-medium text-xl mb-8">
+                                Trending{" "}
+                                <i className="fi fi-rr-arrow-trend-up" />
+                            </h1>
+                            {trendingBlogs == null ? (
+                                <Loader />
+                            ) : (
+                                trendingBlogs.map((blog, i) => {
+                                    return (
+                                        <AnimationWrapper
+                                            transition={{
+                                                duration: 1,
+                                                delay: i * 0.1,
+                                            }}
+                                            key={i}
+                                        >
+                                            <MinimalBlogPost
+                                                blog={blog}
+                                                index={i}
+                                            />
+                                        </AnimationWrapper>
+                                    );
+                                })
+                            )}
+                        </div>
+                    </div>
+                </div>
             </section>
         </AnimationWrapper>
     );
