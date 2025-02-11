@@ -5,10 +5,12 @@ import { useEffect, useState } from "react";
 import Loader from "../components/loader.component";
 import BlogPostCard from "../components/blog-post.component";
 import MinimalBlogPost from "../components/nobanner-blog-post.component";
+import { activeTabRef } from "../components/inpage-navigation.component";
 
 const HomePage = () => {
-    let [blogs, setBlogs] = useState(null);
+    let [blogs, setBlog] = useState(null);
     let [trendingBlogs, setTrendingBlogs] = useState(null);
+    let [pageState, setPageState] = useState("home");
     let categories = [
         "programming",
         "food",
@@ -24,7 +26,7 @@ const HomePage = () => {
         axios
             .get(import.meta.env.VITE_SERVER_DOMAIN + "/latest-blogs")
             .then(({ data }) => {
-                setBlogs(data.blogs);
+                setBlog(data.blogs);
             })
             .catch((err) => {
                 console.log(err);
@@ -42,17 +44,36 @@ const HomePage = () => {
             });
     };
 
+    const loadBlogByCategory = (e) => {
+        let category = e.target.innerText.toLowerCase();
+
+        setBlog(null);
+
+        if (pageState == category) {
+            setPageState("home");
+            return;
+        }
+
+        setPageState(category);
+    };
+
     useEffect(() => {
-        fetchLatestBlogs();
-        fetchTrendingBlogs();
-    }, []);
+        activeTabRef.current.click();
+        if (pageState == "home") {
+            fetchLatestBlogs();
+        }
+        if (trendingBlogs == null) {
+            fetchTrendingBlogs();
+        }
+    }, [pageState]);
+
     return (
         <AnimationWrapper>
             <section className="h-cover flex justify-center gap-10">
                 {/* latest blogs */}
                 <div className="w-full">
                     <InPageNavigation
-                        routes={["home", "trending blogs"]}
+                        routes={[pageState, "trending blogs"]}
                         defaultHidden={["trending blogs"]}
                     >
                         <>
@@ -113,7 +134,16 @@ const HomePage = () => {
                             <div className="flex gap-3 flex-wrap">
                                 {categories.map((category, i) => {
                                     return (
-                                        <button className="tag" key={i}>
+                                        <button
+                                            className={
+                                                "tag " +
+                                                (pageState == category
+                                                    ? "bg-black text-white "
+                                                    : " ")
+                                            }
+                                            key={i}
+                                            onClick={loadBlogByCategory}
+                                        >
                                             {category}
                                         </button>
                                     );
