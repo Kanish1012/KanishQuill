@@ -11,7 +11,7 @@ const BlogPostCard = ({ content, author }) => {
         activity: { total_likes },
         blog_id: id,
     } = content;
-    let { fullanme, profile_img, username } = author;
+    let { fullname, profile_img, username } = author;
 
     return (
         <Link
@@ -23,7 +23,7 @@ const BlogPostCard = ({ content, author }) => {
                 <div className="flex gap-2 items-center mb-7">
                     <img src={profile_img} className="w-6 h-6 rounded-full" />
                     <p className="line-clamp-1">
-                        {fullanme} @{username}
+                        {fullname} @{username}
                     </p>
                     <p className="min-w-fit">{getDay(publishedAt)}</p>
                 </div>

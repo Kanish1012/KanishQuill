@@ -4,6 +4,7 @@ import InPageNavigation from "../components/inpage-navigation.component";
 import { useEffect, useState } from "react";
 import Loader from "../components/loader.component";
 import BlogPostCard from "../components/blog-post.component";
+import MinimalBlogPost from "../components/nobanner-blog-post.component";
 
 const HomePage = () => {
     let [blogs, setBlogs] = useState(null);
@@ -81,7 +82,7 @@ const HomePage = () => {
                                         }}
                                         key={i}
                                     >
-                                        <MinimalBlogPost />
+                                        <MinimalBlogPost blog={blog} index={i} />
                                     </AnimationWrapper>
                                 );
                             })
