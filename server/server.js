@@ -243,7 +243,8 @@ server.post("/google-auth", async (req, res) => {
 });
 
 // Endpoint to fetch the latest published blogs
-server.get("/latest-blogs", (req, res) => {
+server.post("/latest-blogs", (req, res) => {
+    let { page } = req.body;
     let maxLimit = 5;
 
     Blog.find({ draft: false })
@@ -253,9 +254,20 @@ server.get("/latest-blogs", (req, res) => {
         )
         .sort({ publishedAt: -1 })
         .select("blog_id title des banner activity tags publishedAt -_id")
+        .skip((page - 1) * maxLimit)
         .limit(maxLimit)
         .then((blogs) => {
             res.status(200).json({ blogs });
+        })
+        .catch((err) => {
+            res.status(500).json({ error: err.message });
+        });
+});
+
+server.post("/all-latest-blogs-count", (req, res) => {
+    Blog.countDocuments({ draft: false })
+        .then((count) => {
+            res.status(200).json({ totalDocs: count });
         })
         .catch((err) => {
             res.status(500).json({ error: err.message });

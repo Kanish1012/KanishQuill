@@ -7,6 +7,7 @@ import BlogPostCard from "../components/blog-post.component";
 import MinimalBlogPost from "../components/nobanner-blog-post.component";
 import { activeTabRef } from "../components/inpage-navigation.component";
 import NoDataMessage from "../components/nodata.component";
+import { filterPaginationData } from "../common/filter-pagination-data";
 
 const HomePage = () => {
     let [blogs, setBlog] = useState(null);
@@ -24,11 +25,22 @@ const HomePage = () => {
         "cooking",
     ];
 
-    const fetchLatestBlogs = () => {
+    const fetchLatestBlogs = (page = 1) => {
         axios
-            .get(import.meta.env.VITE_SERVER_DOMAIN + "/latest-blogs")
-            .then(({ data }) => {
-                setBlog(data.blogs);
+            .post(import.meta.env.VITE_SERVER_DOMAIN + "/latest-blogs", {
+                page,
+            })
+            .then(async ({ data }) => {
+                console.log(data.blogs);
+                let formatedData = await filterPaginationData({
+                    state: blogs,
+                    data: data.blogs,
+                    page,
+                    countRoute: "/all-latest-blogs-count",
+                });
+
+                console.log(formatedData);
+                setBlog(formatedData);
             })
             .catch((err) => {
                 console.log(err);
@@ -97,8 +109,8 @@ const HomePage = () => {
                         <>
                             {blogs == null ? (
                                 <Loader />
-                            ) : blogs.length ? (
-                                blogs.map((blog, i) => {
+                            ) : blogs.results.length ? (
+                                blogs.results.map((blog, i) => {
                                     return (
                                         <AnimationWrapper
                                             transition={{
