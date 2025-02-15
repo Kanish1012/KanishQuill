@@ -8,6 +8,7 @@ import MinimalBlogPost from "../components/nobanner-blog-post.component";
 import { activeTabRef } from "../components/inpage-navigation.component";
 import NoDataMessage from "../components/nodata.component";
 import { filterPaginationData } from "../common/filter-pagination-data";
+import LoadMoreDataBtn from "../components/load-more.component";
 
 const HomePage = () => {
     let [blogs, setBlog] = useState(null);
@@ -25,7 +26,7 @@ const HomePage = () => {
         "cooking",
     ];
 
-    const fetchLatestBlogs = (page = 1) => {
+    const fetchLatestBlogs = ({ page = 1 }) => {
         axios
             .post(import.meta.env.VITE_SERVER_DOMAIN + "/latest-blogs", {
                 page,
@@ -39,7 +40,6 @@ const HomePage = () => {
                     countRoute: "/all-latest-blogs-count",
                 });
 
-                console.log(formatedData);
                 setBlog(formatedData);
             })
             .catch((err) => {
@@ -47,14 +47,22 @@ const HomePage = () => {
             });
     };
 
-    const fetchBlogsByCategory = () => {
+    const fetchBlogsByCategory = ({ page = 1 }) => {
         axios
             .post(import.meta.env.VITE_SERVER_DOMAIN + "/search-blogs", {
                 tag: pageState,
+                page,
             })
-            .then(({ data }) => {
-                console.log("Fetched blogs:", data);
-                setBlog(data.blogs);
+            .then(async ({ data }) => {
+                let formatedData = await filterPaginationData({
+                    state: blogs,
+                    data: data.blogs,
+                    page,
+                    countRoute: "/search-blogs-count",
+                    data_to_send: { tag: pageState },
+                });
+
+                setBlog(formatedData);
             })
             .catch((err) => {
                 console.log(err);
@@ -88,9 +96,9 @@ const HomePage = () => {
     useEffect(() => {
         activeTabRef.current.click();
         if (pageState == "home") {
-            fetchLatestBlogs();
+            fetchLatestBlogs({ page: 1 });
         } else {
-            fetchBlogsByCategory();
+            fetchBlogsByCategory({ page: 1 });
         }
         if (trendingBlogs == null) {
             fetchTrendingBlogs();
@@ -131,6 +139,14 @@ const HomePage = () => {
                             ) : (
                                 <NoDataMessage message="No Blogs Published" />
                             )}
+                            <LoadMoreDataBtn
+                                state={blogs}
+                                fetchDataFun={
+                                    pageState == "home"
+                                        ? fetchLatestBlogs
+                                        : fetchBlogsByCategory
+                                }
+                            />
                         </>
 
                         {trendingBlogs == null ? (
