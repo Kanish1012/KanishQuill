@@ -1,14 +1,14 @@
 import { useContext, useState } from "react";
 import logo from "../imgs/logo.png";
-import { Link, Outlet } from "react-router-dom";
+import { Link, Outlet, useNavigate } from "react-router-dom";
 import { UserContext } from "../App";
 import UserNavigationPanel from "./user-navigation.component";
 
 const Navbar = () => {
-    // State to manage the visibility of the search box
     const [searchBoxVisibility, setSearchBoxVisibility] = useState(false);
-    // State to manage the visibility of the user navigation panel
     const [userNavPanel, setUserNavPanel] = useState(false);
+
+    let navigate = useNavigate();
 
     // Destructuring the user authentication and profile data from the UserContext
     const {
@@ -19,6 +19,14 @@ const Navbar = () => {
     // Toggles the user navigation panel visibility
     const handleUserNavPanel = () => {
         setUserNavPanel(!userNavPanel);
+    };
+
+    // Handles the search functionality when the user presses the Enter key
+    const handleSearch = (e) => {
+        let query = e.target.value;
+        if (e.keyCode == 13 && query.length) {
+            navigate(`/search/${query}`);
+        }
     };
 
     // Hides the user navigation panel after a short delay when losing focus
@@ -48,6 +56,7 @@ const Navbar = () => {
                         type="text"
                         placeholder="Search"
                         className="w-full md:w-auto bg-grey p-4 pl-6 pr-[12%] md:pr-6 rounded-full placeholder:text-dark-grey md:pl-12"
+                        onKeyDown={handleSearch}
                     />
                     <i className="fi fi-rr-search absolute right-[10%] md:pointer-events-none md:left-5 top-1/2 -translate-y-1/2 text-xl text-dark-grey"></i>
                 </div>
