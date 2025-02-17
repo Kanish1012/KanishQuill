@@ -8,7 +8,7 @@ const UserCard = ({ user }) => {
 
     return (
         // Link to the user's profile page
-        <Link to={`user/${username}`} className="flex gap-5 items-center mb-5">
+        <Link to={`/user/${username}`} className="flex gap-5 items-center mb-5">
             {/* User profile image */}
             <img
                 src={profile_img}

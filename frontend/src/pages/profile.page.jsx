@@ -1,6 +1,10 @@
+import { useParams } from "react-router-dom";
+
 const ProfilePage = ()=>{
+
+    let {id: profileId} = useParams();
     return(
-        <h1>User</h1>
+        <h1>Profile page - {profileId}</h1>
     )
 }
 

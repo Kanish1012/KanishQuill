@@ -360,6 +360,19 @@ server.post("/search-users", (req, res) => {
         });
 });
 
+server.post("/get-profile", (req, res) => {
+    let { username } = req.body;
+
+    User.findOne({ "personal_info.username": username })
+        .select("-personal_info.password -google_auth -blogs -updatedAt")
+        .then((user) => {
+            res.status(200).json(user);
+        })
+        .catch((err) => {
+            res.status(500).json({ error: err.message });
+        });
+});
+
 // Endpoint to create a blog post with JWT authentication and validation.
 server.post("/create-blog", verifyJWT, (req, res) => {
     let authorId = req.user;
