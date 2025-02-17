@@ -360,6 +360,7 @@ server.post("/search-users", (req, res) => {
         });
 });
 
+// Endpoint to get a user's profile information
 server.post("/get-profile", (req, res) => {
     let { username } = req.body;
 
