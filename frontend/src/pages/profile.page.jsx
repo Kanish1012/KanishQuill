@@ -5,6 +5,11 @@ import AnimationWrapper from "../common/page-animation";
 import Loader from "../components/loader.component";
 import { UserContext } from "../App";
 import AboutUser from "../components/about.component";
+import { filterPaginationData } from "../common/filter-pagination-data";
+import InPageNavigation from "../components/inpage-navigation.component";
+import BlogPostCard from "../components/blog-post.component";
+import NoDataMessage from "../components/nodata.component";
+import LoadMoreDataBtn from "../components/load-more.component";
 
 export const profileDataStructure = {
     personal_info: {
@@ -25,6 +30,7 @@ const ProfilePage = () => {
     let { id: profileId } = useParams();
     let [profile, setProfile] = useState(profileDataStructure);
     let [loading, setLoading] = useState(true);
+    let [blogs, setBlog] = useState(null);
 
     let {
         personal_info: {
@@ -49,6 +55,7 @@ const ProfilePage = () => {
             })
             .then(({ data: user }) => {
                 setProfile(user);
+                getBlogs({ user_id: user._id });
                 setLoading(false);
             })
             .catch((err) => {
@@ -60,6 +67,27 @@ const ProfilePage = () => {
     const resetStates = () => {
         setProfile(profileDataStructure);
         setLoading(true);
+    };
+
+    const getBlogs = ({ page = 1, user_id }) => {
+        user_id = user_id == undefined ? blogs.user_id : user_id;
+        axios
+            .post(import.meta.env.VITE_SERVER_DOMAIN + "/search-blogs", {
+                author: user_id,
+                page,
+            })
+            .then(async ({ data }) => {
+                let formatedData = await filterPaginationData({
+                    state: blogs,
+                    data: data.blogs,
+                    page,
+                    countRoute: "/search-blogs-count",
+                    data_to_send: { author: user_id },
+                });
+
+                formatedData.user_id = user_id;
+                setBlog(formatedData);
+            });
     };
 
     useEffect(() => {
@@ -97,7 +125,7 @@ const ProfilePage = () => {
                             ) : (
                                 ""
                             )}
-                        </div>  
+                        </div>
 
                         <AboutUser
                             className={"max-md:hidden"}
@@ -105,6 +133,51 @@ const ProfilePage = () => {
                             social_links={social_links}
                             joinedAt={joinedAt}
                         />
+                    </div>
+
+                    <div className="max-md:mt-12 w-full">
+                        <InPageNavigation
+                            routes={["Blogs Published", "About"]}
+                            defaultHidden={["About"]}
+                        >
+                            <>
+                                {blogs == null ? (
+                                    <Loader />
+                                ) : blogs.results.length ? (
+                                    blogs.results.map((blog, i) => {
+                                        return (
+                                            <AnimationWrapper
+                                                transition={{
+                                                    duration: 1,
+                                                    delay: i * 0.1,
+                                                }}
+                                                key={i}
+                                            >
+                                                <BlogPostCard
+                                                    content={blog}
+                                                    author={
+                                                        blog.author
+                                                            .personal_info
+                                                    }
+                                                />
+                                            </AnimationWrapper>
+                                        );
+                                    })
+                                ) : (
+                                    <NoDataMessage message="No Blogs Published" />
+                                )}
+                                <LoadMoreDataBtn
+                                    state={blogs}
+                                    fetchDataFun={getBlogs}
+                                />
+                            </>
+
+                            <AboutUser
+                                bio={bio}
+                                social_links={social_links}
+                                joinedAt={joinedAt}
+                            />
+                        </InPageNavigation>
                     </div>
                 </section>
             )}

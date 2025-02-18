@@ -3,12 +3,12 @@ import { getFullDay } from "../common/date";
 
 const AboutUser = ({className, bio, social_links, joinedAt }) => {
     return (
-        <div className={"md:mt-7 max-md:hidden"}>
+        <div className={"md:mt-7 " + className}>
             <p className={"text-xl leading-7 " +className }>
                 {bio.length ? bio : "Nothing to read here"}
             </p>
 
-            <div className="flex gap-x-7 gap-y-2 flex-wrap my-7 items-center justify-center text-dark-grey">
+            <div className="flex gap-x-7 gap-y-2 flex-wrap my-7 items-center md:justify-center text-dark-grey">
                 {Object.keys(social_links).map((key) => {
                     let link = social_links[key];
 
