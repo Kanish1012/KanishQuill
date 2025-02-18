@@ -10,6 +10,7 @@ import InPageNavigation from "../components/inpage-navigation.component";
 import BlogPostCard from "../components/blog-post.component";
 import NoDataMessage from "../components/nodata.component";
 import LoadMoreDataBtn from "../components/load-more.component";
+import PageNotFound from "./404.page";
 
 export const profileDataStructure = {
     personal_info: {
@@ -31,6 +32,7 @@ const ProfilePage = () => {
     let [profile, setProfile] = useState(profileDataStructure);
     let [loading, setLoading] = useState(true);
     let [blogs, setBlog] = useState(null);
+    let [profileLoaded, setProfileLoaded] = useState("");
 
     let {
         personal_info: {
@@ -54,7 +56,10 @@ const ProfilePage = () => {
                 username: profileId,
             })
             .then(({ data: user }) => {
-                setProfile(user);
+                if (user != null) {
+                    setProfile(user);
+                }
+                setProfileLoaded(profileId);
                 getBlogs({ user_id: user._id });
                 setLoading(false);
             })
@@ -67,6 +72,7 @@ const ProfilePage = () => {
     const resetStates = () => {
         setProfile(profileDataStructure);
         setLoading(true);
+        setProfileLoaded("");
     };
 
     const getBlogs = ({ page = 1, user_id }) => {
@@ -91,15 +97,20 @@ const ProfilePage = () => {
     };
 
     useEffect(() => {
-        resetStates();
-        fetchUserProfile();
-    }, [profileId]);
+        if (profileId != profileLoaded) {
+            setBlog(null);
+        }
+        if (blogs == null) {
+            resetStates();
+            fetchUserProfile();
+        }
+    }, [profileId, blogs]);
 
     return (
         <AnimationWrapper>
             {loading ? (
                 <Loader />
-            ) : (
+            ) : profile_username.length ? (
                 <section className="h-cover md:flex flex-row-reverse items-start gap-5 min-[1100px]:gap-12">
                     <div className="flex flex-col max:md: items-center gap-5 min-w-[250px]">
                         <img
@@ -180,6 +191,8 @@ const ProfilePage = () => {
                         </InPageNavigation>
                     </div>
                 </section>
+            ) : (
+                <PageNotFound />
             )}
         </AnimationWrapper>
     );
