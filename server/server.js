@@ -298,17 +298,21 @@ server.get("/trending-blogs", (req, res) => {
 
 // Endpoint to fetch the searched blogs
 server.post("/search-blogs", (req, res) => {
-    let { tag, query, author, page } = req.body;
+    let { tag, query, author, page, limit, eliminate_blog } = req.body;
     let findQuery;
     if (tag) {
-        findQuery = { tags: new RegExp(tag, "i"), draft: false };
+        findQuery = {
+            tags: new RegExp(tag, "i"),
+            draft: false,
+            blog_id: { $ne: eliminate_blog },
+        };
     } else if (query) {
         findQuery = { draft: false, title: new RegExp(query, "i") };
     } else if (author) {
         findQuery = { author, draft: false };
     }
 
-    let maxLimit = 5;
+    let maxLimit = limit ? limit : 2;
 
     Blog.find(findQuery)
         .populate(
@@ -452,6 +456,7 @@ server.post("/create-blog", verifyJWT, (req, res) => {
         });
 });
 
+// Endpoint to get a blog post
 server.post("/get-blog", (req, res) => {
     let { blog_id } = req.body;
     let incrementVal = 1;

@@ -5,6 +5,7 @@ import AnimationWrapper from "../common/page-animation";
 import Loader from "../components/loader.component";
 import { getDay } from "../common/date";
 import BlogInteraction from "../components/blog-interaction.component";
+import BlogPostCard from "../components/blog-post.component";
 
 export const blogStructure = {
     title: "",
@@ -12,7 +13,6 @@ export const blogStructure = {
     author: { personal_info: {} },
     des: "",
     content: [],
-    tags: [],
     publishedAt: "",
 };
 
@@ -21,6 +21,7 @@ export const BlogContext = createContext({});
 const BlogPage = () => {
     let { blog_id } = useParams();
     const [blog, setBlog] = useState(blogStructure);
+    const [similarBlogs, setSimilarBlogs] = useState(null);
     const [loading, setLoading] = useState(true);
 
     let {
@@ -38,6 +39,19 @@ const BlogPage = () => {
             .post(import.meta.env.VITE_SERVER_DOMAIN + "/get-blog", { blog_id })
             .then(({ data: { blog } }) => {
                 setBlog(blog);
+                axios
+                    .post(
+                        import.meta.env.VITE_SERVER_DOMAIN + "/search-blogs",
+                        {
+                            tag: blog.tags[0],
+                            limit: 6,
+                            eliminate_blog: blog_id,
+                        }
+                    )
+                    .then(({ data }) => {
+                        setSimilarBlogs(data.blogs);
+                    });
+                setBlog(blog);
                 setLoading(false);
             })
             .catch((err) => {
@@ -47,15 +61,22 @@ const BlogPage = () => {
     };
 
     useEffect(() => {
+        resetStates();
         fetchBlog();
-    }, []);
+    }, [blog_id]);
+
+    const resetStates = () => {
+        setBlog(blogStructure);
+        setSimilarBlogs(null);
+        setLoading(true);
+    };
 
     return (
         <AnimationWrapper>
             {loading ? (
                 <Loader />
             ) : (
-                <BlogContext.Provider value={{blog, setBlog}}>
+                <BlogContext.Provider value={{ blog, setBlog }}>
                     <div className="max-w-[900px] center py-10 max-lg:px-[5vw]">
                         <img src={banner} className="aspect-video" />
                         <div className="mt-12">
@@ -87,6 +108,36 @@ const BlogPage = () => {
                         </div>
 
                         <BlogInteraction />
+                        {/* Blog content */}
+                        <BlogInteraction />
+                        {similarBlogs != null && similarBlogs.length ? (
+                            <>
+                                <h1 className="text-2xl mt-14 mb-10 font-medium">
+                                    Similar Blogs
+                                </h1>
+                                {similarBlogs.map((blog, i) => {
+                                    let {
+                                        author: { personal_info },
+                                    } = blog;
+                                    return (
+                                        <AnimationWrapper
+                                            key={i}
+                                            transition={{
+                                                duration: 1,
+                                                delay: i * 0.08,
+                                            }}
+                                        >
+                                            <BlogPostCard
+                                                content={blog}
+                                                author={personal_info}
+                                            />
+                                        </AnimationWrapper>
+                                    );
+                                })}
+                            </>
+                        ) : (
+                            ""
+                        )}
                     </div>
                 </BlogContext.Provider>
             )}
