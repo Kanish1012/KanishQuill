@@ -6,6 +6,7 @@ import Loader from "../components/loader.component";
 import { getDay } from "../common/date";
 import BlogInteraction from "../components/blog-interaction.component";
 import BlogPostCard from "../components/blog-post.component";
+import BlogContent from "../components/blog-content.component";
 
 export const blogStructure = {
     title: "",
@@ -108,7 +109,17 @@ const BlogPage = () => {
                         </div>
 
                         <BlogInteraction />
-                        {/* Blog content */}
+
+                        <div className="my-12 font-gelasio blog-page-content">
+                            {content[0].blocks.map((block, i) => {
+                                return (
+                                    <div key={i} className="my-4 md:my-8">
+                                        <BlogContent block={block} />
+                                    </div>
+                                );
+                            })}
+                        </div>
+
                         <BlogInteraction />
                         {similarBlogs != null && similarBlogs.length ? (
                             <>
