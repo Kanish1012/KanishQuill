@@ -7,6 +7,7 @@ import { getDay } from "../common/date";
 import BlogInteraction from "../components/blog-interaction.component";
 import BlogPostCard from "../components/blog-post.component";
 import BlogContent from "../components/blog-content.component";
+import CommentsContainer from "../components/comments.component";
 
 // Initial structure for a blog object
 export const blogStructure = {
@@ -27,6 +28,8 @@ const BlogPage = () => {
     const [similarBlogs, setSimilarBlogs] = useState(null); // State for similar blogs
     const [loading, setLoading] = useState(true); // Loading state
     const [isLikedByUser, setIsLikedByUser] = useState(false); // State for user's like status
+    const [commentsWrapper, setCommentsWrapper] = useState(false); // State for comments wrapper
+    const [totalParentComments, setTotalParentComments] = useState(0); // State for total parent comments
 
     // Destructure blog data for easier access
     let {
@@ -79,6 +82,9 @@ const BlogPage = () => {
         setBlog(blogStructure);
         setSimilarBlogs(null);
         setLoading(true);
+        setIsLikedByUser(false);
+        setCommentsWrapper(true);
+        setTotalParentComments(0);
     };
 
     return (
@@ -87,8 +93,18 @@ const BlogPage = () => {
                 <Loader />
             ) : (
                 <BlogContext.Provider
-                    value={{ blog, setBlog, isLikedByUser, setIsLikedByUser }}
+                    value={{
+                        blog,
+                        setBlog,
+                        isLikedByUser,
+                        setIsLikedByUser,
+                        commentsWrapper,
+                        setCommentsWrapper,
+                        totalParentComments,
+                        setTotalParentComments,
+                    }}
                 >
+                    <CommentsContainer />
                     <div className="max-w-[900px] center py-10 max-lg:px-[5vw]">
                         {/* Blog banner image */}
                         <img src={banner} className="aspect-video" />

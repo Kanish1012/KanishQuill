@@ -22,6 +22,7 @@ const BlogInteraction = () => {
         setBlog,
         isLikedByUser,
         setIsLikedByUser,
+        setCommentsWrapper,
     } = useContext(BlogContext);
 
     // Extract current user's authentication data from UserContext
@@ -102,7 +103,10 @@ const BlogInteraction = () => {
                     <p className="text-xl text-dark-grey">{total_likes}</p>
 
                     {/* Comment Button */}
-                    <button className="w-10 h-10 rounded-full flex items-center justify-center bg-grey/80">
+                    <button
+                        className="w-10 h-10 rounded-full flex items-center justify-center bg-grey/80"
+                        onClick={() => setCommentsWrapper((preVal) => !preVal)}
+                    >
                         <i className="fi fi-rr-comment-dots"></i>
                     </button>
                     <p className="text-xl text-dark-grey">{total_comments}</p>
