@@ -26,6 +26,7 @@ const BlogPage = () => {
     const [blog, setBlog] = useState(blogStructure); // State for the current blog
     const [similarBlogs, setSimilarBlogs] = useState(null); // State for similar blogs
     const [loading, setLoading] = useState(true); // Loading state
+    const [isLikedByUser, setIsLikedByUser] = useState(false); // State for user's like status
 
     // Destructure blog data for easier access
     let {
@@ -85,7 +86,9 @@ const BlogPage = () => {
             {loading ? (
                 <Loader />
             ) : (
-                <BlogContext.Provider value={{ blog, setBlog }}>
+                <BlogContext.Provider
+                    value={{ blog, setBlog, isLikedByUser, setIsLikedByUser }}
+                >
                     <div className="max-w-[900px] center py-10 max-lg:px-[5vw]">
                         {/* Blog banner image */}
                         <img src={banner} className="aspect-video" />

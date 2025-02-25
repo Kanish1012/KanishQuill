@@ -1,12 +1,17 @@
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 import { BlogContext } from "../pages/blog.page";
 import { Link } from "react-router-dom";
 import { UserContext } from "../App";
+import { Toaster, toast } from "react-hot-toast";
+import axios from "axios";
 
 const BlogInteraction = () => {
     // Extract blog data and setter function from BlogContext
     let {
+        blog,
         blog: {
+            _id,
+            title,
             blog_id,
             activity,
             activity: { total_likes, total_comments },
@@ -15,15 +20,60 @@ const BlogInteraction = () => {
             },
         },
         setBlog,
+        isLikedByUser,
+        setIsLikedByUser,
     } = useContext(BlogContext);
 
     // Extract current user's authentication data from UserContext
     let {
-        userAuth: { username },
+        userAuth: { username, access_token },
     } = useContext(UserContext);
+
+    useEffect(() => {
+        if (access_token) {
+            axios
+                .post(
+                    import.meta.env.VITE_SERVER_DOMAIN + "/isliked-by-user",
+                    { _id },
+                    { headers: { Authorization: `Bearer ${access_token}` } }
+                )
+                .then(({ data: { result } }) => {
+                    setIsLikedByUser(Boolean(result));
+                })
+                .catch((err) => {
+                    console.log(err);
+                });
+        }
+    }, []);
+
+    const handleLike = () => {
+        if (access_token) {
+            // Like the blog
+            setIsLikedByUser((preVal) => !preVal);
+            !isLikedByUser ? total_likes++ : total_likes--;
+            setBlog({ ...blog, activity: { ...activity, total_likes } });
+            console.log("Access Token:", access_token);
+            axios
+                .post(
+                    import.meta.env.VITE_SERVER_DOMAIN + "/like-blog",
+                    {
+                        _id,
+                        isLikedByUser,
+                    },
+                    { headers: { Authorization: `Bearer ${access_token}` } }
+                )
+                .then(({ data }) => {
+                    console.log(data);
+                })
+                .catch((err) => {
+                    console.log(err);
+                });
+        }
+    };
 
     return (
         <>
+            <Toaster />
             {/* Divider line */}
             <hr className="border-grey my-2" />
 
@@ -31,8 +81,23 @@ const BlogInteraction = () => {
             <div className="flex gap-6 justify-between items-center">
                 <div className="flex gap-3 items-center">
                     {/* Like Button */}
-                    <button className="w-10 h-10 rounded-full flex items-center justify-center bg-grey/80">
-                        <i className="fi fi-rr-heart"></i>
+                    <button
+                        className={
+                            "w-10 h-10 rounded-full flex items-center justify-center " +
+                            (isLikedByUser
+                                ? "bg-red/20 text-red"
+                                : "bg-grey/80")
+                        }
+                        onClick={handleLike}
+                    >
+                        <i
+                            className={
+                                "fi " +
+                                (isLikedByUser
+                                    ? "fi-sr-heart "
+                                    : "fi-rr-heart ")
+                            }
+                        ></i>
                     </button>
                     <p className="text-xl text-dark-grey">{total_likes}</p>
 
