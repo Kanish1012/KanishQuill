@@ -42,6 +42,7 @@ const App = () => {
         <UserContext.Provider value={{ userAuth, setUserAuth }}>
             <Routes>
                 <Route path="/editor" element={<Editor />} />
+                <Route path="/editor/:blog_id" element={<Editor />} />
                 <Route path="/" element={<Navbar />}>
                     <Route index element={<HomePage />} />
                     <Route
