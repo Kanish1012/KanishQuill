@@ -7,7 +7,9 @@ import { getDay } from "../common/date";
 import BlogInteraction from "../components/blog-interaction.component";
 import BlogPostCard from "../components/blog-post.component";
 import BlogContent from "../components/blog-content.component";
-import CommentsContainer from "../components/comments.component";
+import CommentsContainer, {
+    fetchComments,
+} from "../components/comments.component";
 
 // Initial structure for a blog object
 export const blogStructure = {
@@ -29,7 +31,8 @@ const BlogPage = () => {
     const [loading, setLoading] = useState(true); // Loading state
     const [isLikedByUser, setIsLikedByUser] = useState(false); // State for user's like status
     const [commentsWrapper, setCommentsWrapper] = useState(false); // State for comments wrapper
-    const [totalParentCommentsLoaded, setTotalParentCommentsLoaded] = useState(0); // State for total parent comments
+    const [totalParentCommentsLoaded, setTotalParentCommentsLoaded] =
+        useState(0); // State for total parent comments
 
     // Destructure blog data for easier access
     let {
@@ -46,7 +49,12 @@ const BlogPage = () => {
     const fetchBlog = () => {
         axios
             .post(import.meta.env.VITE_SERVER_DOMAIN + "/get-blog", { blog_id })
-            .then(({ data: { blog } }) => {
+            .then(async ({ data: { blog } }) => {
+                blog.comments = await fetchComments({
+                    blog_id: blog._id,
+                    setParentCommentCountFun: setTotalParentCommentsLoaded,
+                });
+
                 setBlog(blog);
 
                 // Fetch similar blogs using the first tag of the current blog
@@ -83,7 +91,7 @@ const BlogPage = () => {
         setSimilarBlogs(null);
         setLoading(true);
         setIsLikedByUser(false);
-        setCommentsWrapper(true);
+        setCommentsWrapper(false);
         setTotalParentCommentsLoaded(0);
     };
 

@@ -617,6 +617,28 @@ server.post("/add-comment", verifyJWT, (req, res) => {
     });
 });
 
+// Endpoint to fetch comments
+server.post("/get-blog-comments", (req, res) => {
+    let { blog_id, skip } = req.body;
+    let maxLimit = 5;
+
+    Comment.find({ blog_id, isReply: false })
+        .populate(
+            "commented_by",
+            "personal_info.username personal_info.profile_img personal_info.fullname"
+        )
+        .skip(skip)
+        .limit(maxLimit)
+        .sort({ commentedAt: -1 })
+        .then((comments) => {
+            res.status(200).json(comments);
+        })
+        .catch((err) => {
+            console.log(err.message);
+            res.status(500).json({ error: err.message });
+        });
+});
+
 // Start the server
 server.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
