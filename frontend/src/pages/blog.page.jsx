@@ -29,7 +29,7 @@ const BlogPage = () => {
     const [loading, setLoading] = useState(true); // Loading state
     const [isLikedByUser, setIsLikedByUser] = useState(false); // State for user's like status
     const [commentsWrapper, setCommentsWrapper] = useState(false); // State for comments wrapper
-    const [totalParentComments, setTotalParentComments] = useState(0); // State for total parent comments
+    const [totalParentCommentsLoaded, setTotalParentCommentsLoaded] = useState(0); // State for total parent comments
 
     // Destructure blog data for easier access
     let {
@@ -84,7 +84,7 @@ const BlogPage = () => {
         setLoading(true);
         setIsLikedByUser(false);
         setCommentsWrapper(true);
-        setTotalParentComments(0);
+        setTotalParentCommentsLoaded(0);
     };
 
     return (
@@ -100,8 +100,8 @@ const BlogPage = () => {
                         setIsLikedByUser,
                         commentsWrapper,
                         setCommentsWrapper,
-                        totalParentComments,
-                        setTotalParentComments,
+                        totalParentCommentsLoaded,
+                        setTotalParentCommentsLoaded,
                     }}
                 >
                     <CommentsContainer />
