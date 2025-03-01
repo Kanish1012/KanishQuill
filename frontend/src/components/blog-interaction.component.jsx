@@ -70,6 +70,9 @@ const BlogInteraction = () => {
                     console.log(err);
                 });
         }
+        else{
+            toast.error("Please login to like the blog");
+        }
     };
 
     return (

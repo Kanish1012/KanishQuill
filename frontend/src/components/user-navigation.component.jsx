@@ -1,10 +1,12 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import AnimationWrapper from "../common/page-animation";
 import { useContext } from "react";
 import { UserContext } from "../App";
 import { removeFromSession } from "../common/session";
 
 const UserNavigationPanel = () => {
+    const navigate = useNavigate();
+
     // Accessing the user's authentication details and updater function from UserContext
     const {
         userAuth: { username },
@@ -17,6 +19,8 @@ const UserNavigationPanel = () => {
         removeFromSession("user");
         // Reset user authentication state
         setUserAuth({ access_token: null });
+        // Redirect to the home page
+        navigate("/");
     };
 
     return (
@@ -54,7 +58,7 @@ const UserNavigationPanel = () => {
 
                 {/* Sign-out button */}
                 <button
-                    className="text-left p-4 hover:bg-grey w-fll py-4 pl-8"
+                    className="text-left p-4 hover:bg-grey w-full py-4 pl-8"
                     onClick={signOutUser}
                 >
                     <h1 className="font-bold text-xl mg-1">Sign out</h1>

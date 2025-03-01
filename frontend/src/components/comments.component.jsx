@@ -2,36 +2,50 @@ import { useContext } from "react";
 import { BlogContext } from "../pages/blog.page";
 import CommentField from "./comment-field.component";
 import axios from "axios";
+import NoDataMessage from "./nodata.component";
+import AnimationWrapper from "../common/page-animation";
+import CommentCard from "./comment-card.component";
 
-export const fetchComments = async({skip= 0, blog_id, setParentCommentCountFun, comment_array = null})=>{
+export const fetchComments = async ({
+    skip = 0,
+    blog_id,
+    setParentCommentCountFun,
+    comment_array = null,
+}) => {
     let res;
 
-    await axios.post(import.meta.env.VITE_SERVER_DOMAIN + "/get-blog-comments", { blog_id, skip }).then(({data})=>{
-        data.map(comment=>{
-            comment.childrenLevel = 0;
+    await axios
+        .post(import.meta.env.VITE_SERVER_DOMAIN + "/get-blog-comments", {
+            blog_id,
+            skip,
         })
+        .then(({ data }) => {
+            data.map((comment) => {
+                comment.childrenLevel = 0;
+            });
 
-        setParentCommentCountFun(preVal=> preVal + data.length);
+            setParentCommentCountFun((preVal) => preVal + data.length);
 
-        if(comment_array == null){
-            res = {results: data}
-        }
-        else{
-            res = {results: [...comment_array, ...data] }
-        }
-    })
+            if (comment_array == null) {
+                res = { results: data };
+            } else {
+                res = { results: [...comment_array, ...data] };
+            }
+        });
 
     return res;
-
-}
+};
 
 const CommentsContainer = () => {
     let {
-        blog: { title },
+        blog: {
+            title,
+            comments: { results: commentArr },
+        },
         commentsWrapper,
         setCommentsWrapper,
     } = useContext(BlogContext);
-    
+
     return (
         <div
             className={
@@ -58,7 +72,23 @@ const CommentsContainer = () => {
 
             <hr className="border-grey my-8 w-[120%] -ml-10" />
 
-            <CommentField action="comment"/>
+            <CommentField action="comment" />
+
+            {commentArr && commentArr.length ? (
+                commentArr.map((comment, i) => {
+                    return (
+                        <AnimationWrapper key={i}>
+                            <CommentCard
+                                index={i}
+                                leftVal={comment.childrenLevel * 4}
+                                commentData={comment}
+                            />
+                        </AnimationWrapper>
+                    );
+                })
+            ) : (
+                <NoDataMessage message="No comments" />
+            )}
         </div>
     );
 };
