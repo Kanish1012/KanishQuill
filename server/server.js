@@ -687,6 +687,75 @@ server.post("/get-replies", (req, res) => {
         });
 });
 
+const deleteComments = (_id) => {
+    Comment.findOneAndDelete({ _id })
+        .then((comment) => {
+            if (comment.parent) {
+                Comment.findOneAndUpdate(
+                    { _id: comment.parent },
+                    { $pull: { children: _id } }
+                )
+                    .then((data) => {
+                        console.log("Comment deleted from parent");
+                    })
+                    .catch((err) => {
+                        console.log(err.message);
+                    });
+            }
+
+            Notification.findOneAndDelete({ comment: _id }).then(
+                (notification) => {
+                    console.log("Comment notification deleted");
+                }
+            );
+
+            Notification.findOneAndDelete({ reply: _id }).then(
+                (notification) => {
+                    console.log("Reply notification deleted");
+                }
+            );
+
+            Blog.findOneAndUpdate(
+                { _id: comment.blog_id },
+                {
+                    $pull: { comments: _id },
+                    $inc: { "activity.total_comments": -1 },
+                    "activity.total_parent_comments": comment.parent ? 0 : -1,
+                }
+            )
+                .then((blog) => {
+                    if (comment.children.length) {
+                        comment.children.map((replies) => {
+                            deleteComments(replies);
+                        });
+                    }
+                })
+                .catch((err) => {
+                    console.log(err.message);
+                });
+        })
+        .catch((err) => {
+            console.log(err.message);
+        });
+};
+
+// Delete comment
+server.post("/delete-comment", verifyJWT, (req, res) => {
+    let user_id = req.user;
+    let { _id } = req.body;
+
+    Comment.findOne({ _id }).then((comment) => {
+        if (user_id == comment.commented_by || user_id == comment.blog_author) {
+            deleteComments(_id);
+            return res.status(200).json({ status: "done" });
+        } else {
+            res.status(401).json({
+                error: "You cannot delete this comment.",
+            });
+        }
+    });
+});
+
 // Start the server
 server.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
