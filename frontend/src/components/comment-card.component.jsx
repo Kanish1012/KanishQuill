@@ -7,6 +7,7 @@ import { BlogContext } from "../pages/blog.page";
 import axios from "axios";
 
 const CommentCard = ({ index, leftVal, commentData }) => {
+    // Extract comment details
     let {
         commented_by: {
             personal_info: {
@@ -21,6 +22,7 @@ const CommentCard = ({ index, leftVal, commentData }) => {
         children,
     } = commentData;
 
+    // Extract blog context data
     let {
         blog,
         blog: {
@@ -36,12 +38,14 @@ const CommentCard = ({ index, leftVal, commentData }) => {
         setTotalParentCommentsLoaded,
     } = useContext(BlogContext);
 
+    // Extract user authentication data
     let {
         userAuth: { access_token, username },
     } = useContext(UserContext);
 
     const [isReplying, setReplying] = useState(false);
 
+    // Find the index of the parent comment
     const getParentIndex = () => {
         let startingPoint = index - 1;
 
@@ -59,6 +63,7 @@ const CommentCard = ({ index, leftVal, commentData }) => {
         return startingPoint;
     };
 
+    // Remove a comment and its replies from the list
     const removeCommentsCard = (startingpPint, isDelete = false) => {
         if (commentsArr[startingpPint]) {
             while (
@@ -106,6 +111,7 @@ const CommentCard = ({ index, leftVal, commentData }) => {
         });
     };
 
+    // Load replies for a comment
     const loadReplies = ({ skip = 0 }) => {
         if (children.length) {
             hideReplies();
@@ -136,6 +142,7 @@ const CommentCard = ({ index, leftVal, commentData }) => {
         }
     };
 
+    // Delete a comment
     const deleteComment = (e) => {
         e.target.setAttribute("disabled", true);
 
@@ -158,11 +165,13 @@ const CommentCard = ({ index, leftVal, commentData }) => {
             });
     };
 
+    // Hide replies for a comment
     const hideReplies = () => {
         commentData.isReplyLoaded = false;
         removeCommentsCard(index + 1);
     };
 
+    // Handle reply button click
     const handleReplyClick = () => {
         if (!access_token) {
             return toast.error("Login first to reply");
@@ -179,6 +188,7 @@ const CommentCard = ({ index, leftVal, commentData }) => {
                 style={{ paddingLeft: `${leftVal * 10}px` }}
             >
                 <div className="my-5 p-6 rounded-md border border-grey">
+                    {/* Comment header with user info and timestamp */}
                     <div className="flex gap-3 items-center mb-8">
                         <img
                             src={profile_img}
@@ -190,8 +200,10 @@ const CommentCard = ({ index, leftVal, commentData }) => {
                         <p className="min-w-fit">{getDay(commentedAt)}</p>
                     </div>
 
+                    {/* Comment content */}
                     <p className="font-gelasio text-xl ml-3">{comment}</p>
 
+                    {/* Actions (Reply, Hide Reply, Delete) */}
                     <div className="flex gap-5 items-center mt-5">
                         {commentData.isReplyLoaded ? (
                             <button
@@ -218,6 +230,7 @@ const CommentCard = ({ index, leftVal, commentData }) => {
                             Reply
                         </button>
 
+                        {/* Show delete button only if the user is the author of the comment or blog */}
                         {username == commented_by_username ||
                         username == blog_author ? (
                             <button
@@ -231,6 +244,7 @@ const CommentCard = ({ index, leftVal, commentData }) => {
                         )}
                     </div>
 
+                    {/* Reply input field */}
                     {isReplying ? (
                         <div className="mt-8">
                             <CommentField

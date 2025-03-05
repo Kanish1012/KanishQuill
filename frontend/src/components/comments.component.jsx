@@ -6,6 +6,7 @@ import NoDataMessage from "./nodata.component";
 import AnimationWrapper from "../common/page-animation";
 import CommentCard from "./comment-card.component";
 
+// Function to fetch comments from the server
 export const fetchComments = async ({
     skip = 0,
     blog_id,
@@ -20,12 +21,15 @@ export const fetchComments = async ({
             skip,
         })
         .then(({ data }) => {
+            // Add a childrenLevel property to each comment
             data.map((comment) => {
                 comment.childrenLevel = 0;
             });
 
+            // Update the total count of parent comments
             setParentCommentCountFun((preVal) => preVal + data.length);
 
+            // Merge new comments with existing ones if available
             if (comment_array == null) {
                 res = { results: data };
             } else {
@@ -52,6 +56,7 @@ const CommentsContainer = () => {
         setBlog,
     } = useContext(BlogContext);
 
+    // Function to load more comments when "Load More" is clicked
     const loadMoreComments = async () => {
         let newCommentsArr = await fetchComments({
             skip: totalParentCommentsLoaded,
@@ -60,6 +65,7 @@ const CommentsContainer = () => {
             comment_array: commentsArr,
         });
 
+        // Update the blog state with the new comments
         setBlog({ ...blog, comments: newCommentsArr });
     };
 
@@ -79,6 +85,7 @@ const CommentsContainer = () => {
                     {title}
                 </p>
 
+                {/* Button to toggle comment section visibility */}
                 <button
                     onClick={() => setCommentsWrapper((preVal) => !preVal)}
                     className="absolute top-0 right-0 flex justify-center items-center w-12 h-12 rounded-full bg-grey"
@@ -89,8 +96,10 @@ const CommentsContainer = () => {
 
             <hr className="border-grey my-8 w-[120%] -ml-10" />
 
+            {/* Input field for adding a new comment */}
             <CommentField action="comment" />
 
+            {/* Display comments if available, otherwise show a message */}
             {commentsArr && commentsArr.length ? (
                 commentsArr.map((comment, i) => {
                     return (
@@ -107,6 +116,7 @@ const CommentsContainer = () => {
                 <NoDataMessage message="No comments" />
             )}
 
+            {/* Load more comments button if there are more to fetch */}
             {total_parent_comments > totalParentCommentsLoaded ? (
                 <button
                     onClick={loadMoreComments}
