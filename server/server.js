@@ -13,6 +13,7 @@ import Blog from "./Schema/Blog.js";
 import aws from "aws-sdk";
 import Notification from "./Schema/Notification.js";
 import Comment from "./Schema/Comment.js";
+import { populate } from "dotenv";
 
 const server = express();
 let PORT = 3000;
@@ -582,6 +583,7 @@ server.post("/add-comment", verifyJWT, (req, res) => {
 
     if (replying_to) {
         commentObj.parent = replying_to;
+        commentObj.isReply = true;
     }
 
     new Comment(commentObj).save().then(async (commentFile) => {
@@ -653,6 +655,35 @@ server.post("/get-blog-comments", (req, res) => {
         .catch((err) => {
             console.log(err.message);
             res.status(500).json({ error: err.message });
+        });
+});
+
+// Endpoint to fetch replies
+server.post("/get-replies", (req, res) => {
+    let { _id, skip } = req.body;
+
+    let maxLimit = 5;
+
+    Comment.findOne({ _id })
+        .populate({
+            path: "children",
+            option: {
+                limit: maxLimit,
+                skip: skip,
+                sort: { commentedAt: -1 },
+            },
+            populate: {
+                path: "commented_by",
+                select: "personal_info.username personal_info.profile_img personal_info.fullname",
+            },
+            select: "-blog_id -updatedAt",
+        })
+        .select("children")
+        .then((doc) => {
+            res.status(200).json({ replies: doc.children });
+        })
+        .catch((err) => {
+            console.log(err.message);
         });
 });
 
