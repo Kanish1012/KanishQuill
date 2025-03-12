@@ -40,7 +40,7 @@ const Navbar = () => {
     return (
         <>
             {/* Main navigation bar */}
-            <nav className="navbar">
+            <nav className="navbar z-50">
                 {/* Logo linking to the home page */}
                 <Link to="/" className="flex-none w-10">
                     <img src={logo} className="w-full" />
