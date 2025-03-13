@@ -10,7 +10,7 @@ const SideNav = () => {
     let page = location.pathname.split("/")[2];
 
     let [pageState, setPageState] = useState(page.replace("-", " "));
-    let [showSideNav, setShowSideNav] = useState(window.innerWidth > 768);
+    let [showSideNav, setShowSideNav] = useState(false);
 
     let activeTabLine = useRef();
     let sideBarIconTab = useRef();
@@ -21,26 +21,15 @@ const SideNav = () => {
         activeTabLine.current.style.width = offsetWidth + "px";
         activeTabLine.current.style.left = offsetLeft + "px";
 
-        if (e.target === sideBarIconTab.current) {
-            setShowSideNav((prev) => !prev);
+        if (e.target == sideBarIconTab.current) {
+            setShowSideNav(true);
         } else {
-            setShowSideNav(window.innerWidth > 768);
+            setShowSideNav(false);
         }
     };
 
     useEffect(() => {
-        const handleResize = () => {
-            setShowSideNav(window.innerWidth > 768);
-        };
-
-        handleResize();
-        window.addEventListener("resize", handleResize);
-
-        return () => window.removeEventListener("resize", handleResize);
-    }, []);
-
-    useEffect(() => {
-        setShowSideNav(window.innerWidth > 768);
+        setShowSideNav(false);
         pageStateTab.current.click();
     }, [pageState]);
 
@@ -73,9 +62,9 @@ const SideNav = () => {
 
                     <div
                         className={
-                            "min-w-[200px] h-[calc(100vh-80px-60px)] md:h-cover md:sticky top-24 overflow-y-auto p-6 md:pr-0 md:border-grey md:border-r bg-white duration-500 " +
-                            (showSideNav
-                                ? "opacity-100 pointer-events-auto"
+                            "min-w-[200px] h-[calc(100vh-80px-60px)] md:h-cover md:sticky top-24 overflow-y-auto p-6 md:pr-0 md:border-grey md:border-r absolute max-md:top-[64px] bg-white max-md:w-[calc(100% + 80px)] max-md:px-16 max-md:-ml-7 duration-500 " +
+                            (showSideNav || window.innerWidth >= 768
+                                ? "opacity-100 pointer-events-auto z-50"
                                 : "max-md:opacity-0 max-md:pointer-events-none")
                         }
                     >
