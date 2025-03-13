@@ -245,6 +245,75 @@ server.post("/google-auth", async (req, res) => {
         );
 });
 
+// Endpoint to change-password
+server.post("/change-password", verifyJWT, (req, res) => {
+    let { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword.length || !newPassword.length) {
+        return toast.error("Fill all the inputs");
+    }
+
+    if (
+        !passwordRegex.test(currentPassword) ||
+        !passwordRegex.test(newPassword)
+    ) {
+        return res.status(403).json({
+            error: "Password must be 6-20 characters long and include a number, uppercase, and lowercase letter",
+        });
+    }
+
+    if (currentPassword == newPassword) {
+        return res
+            .status(403)
+            .json({
+                error: "New password is the same as the current password",
+            });
+    }
+
+    User.findOne({ _id: req.user })
+        .then((user) => {
+            if (user.google_auth) {
+                return res.status(403).json({
+                    error: "You can't change account password because you logged in with google",
+                });
+            }
+
+            bcrypt.compare(
+                currentPassword,
+                user.personal_info.password,
+                (err, result) => {
+                    if (err) {
+                        return res.status(500).json({ error: err.message });
+                    }
+                    if (!result) {
+                        return res
+                            .status(403)
+                            .json({ error: "Current password is incorrect" });
+                    }
+                    bcrypt.hash(newPassword, 10, (err, hashed_password) => {
+                        User.findOneAndUpdate(
+                            { _id: req.user },
+                            { "personal_info.password": hashed_password }
+                        )
+                            .then((u) => {
+                                return res.status(200).json({
+                                    status: "Password changed successfully",
+                                });
+                            })
+                            .catch((err) => {
+                                return res
+                                    .status(500)
+                                    .json({ error: err.message });
+                            });
+                    });
+                }
+            );
+        })
+        .catch((err) => {
+            return res.status(500).json({ error: err.message });
+        });
+});
+
 // Endpoint to fetch the latest published blogs
 server.post("/latest-blogs", (req, res) => {
     let { page } = req.body;

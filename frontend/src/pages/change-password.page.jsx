@@ -31,6 +31,10 @@ const ChangePassword = () => {
                 "Password must be 6-20 characters long and include a number, uppercase, and lowercase letter"
             );
         }
+
+        if(currentPassword == newPassword){
+            return toast.error("Current and new password can't be the same");
+        }
     };
 
     return (
