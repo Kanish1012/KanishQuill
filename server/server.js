@@ -453,6 +453,22 @@ server.post("/get-profile", (req, res) => {
         });
 });
 
+// Endpoint for update profile image
+server.post("/update-profile-img", verifyJWT, (req, res) => {
+    let { url } = req.body;
+
+    User.findOneAndUpdate(
+        { _id: req.user },
+        { "personal_info.profile_img": url }
+    )
+        .then(() => {
+            res.status(200).json({ profile_img: url});
+        })
+        .catch((err) => {
+            res.status(500).json({ error: err.message });
+        });
+});
+
 // Endpoint to create a blog post with JWT authentication and validation.
 server.post("/create-blog", verifyJWT, (req, res) => {
     let authorId = req.user;
