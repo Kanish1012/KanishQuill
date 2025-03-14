@@ -130,7 +130,41 @@ const EditProfile = () => {
                                 onChange={handleCharacterChange}
                             ></textarea>
 
-                            <p className="mt-1 text-dark-grey">{charactersLeft} characters left</p>
+                            <p className="mt-1 text-dark-grey">
+                                {charactersLeft} characters left
+                            </p>
+
+                            <p className="my-6 text-dark-grey">
+                                Add your social handles below
+                            </p>
+
+                            <div className="md:grid md:grid-cols-2 gap-x-6 ">
+                                {Object.keys(social_links).map((key, i) => {
+                                    let link = social_links[key];
+                                    return (
+                                        <InputBox
+                                            key={i}
+                                            name={key}
+                                            type="text"
+                                            value={link}
+                                            placeholder={key + " link"}
+                                            icon={
+                                                "fi " +
+                                                (key != "website"
+                                                    ? "fi-brands-" + key
+                                                    : "fi-rr-globe")
+                                            }
+                                        />
+                                    );
+                                })}
+                            </div>
+
+                            <button
+                                className="btn-dark w-auto px-10"
+                                type="submit"
+                            >
+                                Update
+                            </button>
                         </div>
                     </div>
                 </form>
