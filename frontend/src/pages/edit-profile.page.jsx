@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { UserContext } from "../App";
 import axios from "axios";
 import { profileDataStructure } from "./profile.page";
@@ -15,9 +15,12 @@ const EditProfile = () => {
 
     let bioLimit = 150;
 
+    let profileImgEle = useRef()
+
     const [profile, setProfile] = useState(profileDataStructure);
     const [loading, setLoading] = useState(true);
     const [charactersLeft, setCharactersLeft] = useState(bioLimit);
+    const [updatedProfileImg, setUpdatedProfileImg] = useState(null)
 
     let {
         personal_info: {
@@ -46,6 +49,12 @@ const EditProfile = () => {
         }
     }, [access_token]);
 
+    const handleImagePreview = (e)=>{
+        let img = e.target.files[0]
+        profileImgEle.current.src = URL.createObjectURL(img);
+        setUpdatedProfileImg(img)
+    }
+
     const handleCharacterChange = (e) => {
         setCharactersLeft(bioLimit - e.target.value.length);
     };
@@ -69,13 +78,14 @@ const EditProfile = () => {
                                 <div className="w-full h-full absolute top-0 left-0 flex items-center justify-center text-white bg-black/30 opacity-0 hover:opacity-100 cursor-pointer">
                                     Upload Image
                                 </div>
-                                <img src={profile_img} />
+                                <img src={profile_img} ref={profileImgEle}/>
                             </label>
                             <input
                                 type="file"
                                 id="uploadImage"
                                 accept=".jpeg, .png, .jpg"
                                 hidden
+                                onChange={handleImagePreview}
                             />
 
                             <button className="btn-light mt-5 max-lg:center lg:w-full px-10">

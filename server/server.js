@@ -263,11 +263,9 @@ server.post("/change-password", verifyJWT, (req, res) => {
     }
 
     if (currentPassword == newPassword) {
-        return res
-            .status(403)
-            .json({
-                error: "New password is the same as the current password",
-            });
+        return res.status(403).json({
+            error: "New password is the same as the current password",
+        });
     }
 
     User.findOne({ _id: req.user })
