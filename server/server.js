@@ -453,7 +453,7 @@ server.post("/get-profile", (req, res) => {
         });
 });
 
-// Endpoint for update profile image
+// Endpoint for updating profile image
 server.post("/update-profile-img", verifyJWT, (req, res) => {
     let { url } = req.body;
 
@@ -462,10 +462,70 @@ server.post("/update-profile-img", verifyJWT, (req, res) => {
         { "personal_info.profile_img": url }
     )
         .then(() => {
-            res.status(200).json({ profile_img: url});
+            res.status(200).json({ profile_img: url });
         })
         .catch((err) => {
             res.status(500).json({ error: err.message });
+        });
+});
+
+// Endpoint for updating profile
+server.post("/update-profile", verifyJWT, (req, res) => {
+    let { username, bio, social_links } = req.body;
+    let bioLimit = 150;
+
+    if (username.length < 3) {
+        return res
+            .status(403)
+            .json({ error: "Username must be at least 3 characters" });
+    }
+    if (bio.length > bioLimit) {
+        return res
+            .status(403)
+            .json({ error: `Bio must be less than ${bioLimit} charcters` });
+    }
+
+    let socialLinksArr = Object.keys(social_links);
+
+    try {
+        for (let i = 0; i < socialLinksArr.length; i++) {
+            if (social_links[socialLinksArr[i]].length) {
+                let hostname = new URL(social_links[socialLinksArr[i]])
+                    .hostname;
+
+                if (
+                    socialLinksArr[i] !== "website" &&
+                    !hostname.includes(`${socialLinksArr[i]}.com`)
+                ) {
+                    return res.status(403).json({
+                        error: `Invalid ${socialLinksArr[i]} link. You must enter the full and correct link.`,
+                    });
+                }
+            }
+        }
+    } catch (err) {
+        return res.status(500).json({ error: err.message });
+    }
+
+    let updateObj = {
+        "personal_info.username": username,
+        "personal_info.bio": bio,
+        social_links,
+    };
+
+    User.findOneAndUpdate({ _id: req.user }, updateObj, {
+        runValidators: true,
+    })
+        .then(() => {
+            res.json({ username });
+        })
+        .catch((err) => {
+            if (err.code == 11000) {
+                return res
+                    .status(409)
+                    .json({ error: "Username already exists" });
+            }
+            return res.status(500).json({ error: err.message });
         });
 });
 
