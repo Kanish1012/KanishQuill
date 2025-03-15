@@ -9,23 +9,29 @@ import InputBox from "../components/input.component";
 import { uploadImage } from "../common/aws";
 import { storeInSession } from "../common/session";
 
+// Edit Profile component
 const EditProfile = () => {
+    // Get user authentication context
     let {
         userAuth,
         userAuth: { access_token },
         setUserAuth,
     } = useContext(UserContext);
 
+    // Set bio character limit
     let bioLimit = 150;
 
+    // Create references for profile image and edit profile form
     let profileImgEle = useRef();
     let editProfileForm = useRef();
 
+    // Initialize state for profile data, loading status, and character count
     const [profile, setProfile] = useState(profileDataStructure);
     const [loading, setLoading] = useState(true);
     const [charactersLeft, setCharactersLeft] = useState(bioLimit);
     const [updatedProfileImg, setUpdatedProfileImg] = useState(null);
 
+    // Destructure profile data
     let {
         personal_info: {
             fullname,
@@ -37,6 +43,7 @@ const EditProfile = () => {
         social_links,
     } = profile;
 
+    // Fetch profile data on mount
     useEffect(() => {
         if (access_token) {
             axios
@@ -53,12 +60,14 @@ const EditProfile = () => {
         }
     }, [access_token]);
 
+    // Handle image preview
     const handleImagePreview = (e) => {
         let img = e.target.files[0];
         profileImgEle.current.src = URL.createObjectURL(img);
         setUpdatedProfileImg(img);
     };
 
+    // Handle image upload
     const handleImageUpload = (e) => {
         e.preventDefault();
         if (updatedProfileImg) {
@@ -110,10 +119,12 @@ const EditProfile = () => {
         }
     };
 
+    // Handle character count change
     const handleCharacterChange = (e) => {
         setCharactersLeft(bioLimit - e.target.value.length);
     };
 
+    // Handle form submission
     const handleSubmit = (e) => {
         e.preventDefault();
 
@@ -135,6 +146,7 @@ const EditProfile = () => {
             website,
         } = formData;
 
+        // Validate form data
         if (username.length < 3) {
             toast.error("Username must be at least 3 characters long");
         }
