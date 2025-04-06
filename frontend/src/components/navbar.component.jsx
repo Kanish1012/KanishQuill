@@ -1,8 +1,9 @@
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import logo from "../imgs/logo.png";
 import { Link, Outlet, useNavigate } from "react-router-dom";
 import { UserContext } from "../App";
 import UserNavigationPanel from "./user-navigation.component";
+import axios from "axios";
 
 const Navbar = () => {
     const [searchBoxVisibility, setSearchBoxVisibility] = useState(false);
@@ -13,8 +14,26 @@ const Navbar = () => {
     // Destructuring the user authentication and profile data from the UserContext
     const {
         userAuth,
-        userAuth: { access_token, profile_img },
+        userAuth: { access_token, profile_img, new_notification_available },
+        setUserAuth,
     } = useContext(UserContext);
+
+    useEffect(() => {
+        if (access_token) {
+            axios
+                .get(import.meta.env.VITE_SERVER_DOMAIN + "/new-notification", {
+                    headers: {
+                        Authorization: `Bearer ${access_token}`,
+                    },
+                })
+                .then(({ data }) => {
+                    setUserAuth({ ...userAuth, ...data });
+                })
+                .catch((err) => {
+                    console.error(err);
+                });
+        }
+    }, [access_token]);
 
     // Toggles the user navigation panel visibility
     const handleUserNavPanel = () => {
@@ -26,7 +45,7 @@ const Navbar = () => {
         let query = e.target.value;
         if (e.keyCode == 13 && query.length) {
             navigate(`/search/${query}`);
-            e.target.value=""
+            e.target.value = "";
         }
     };
 
