@@ -99,7 +99,7 @@ const SideNav = () => {
 
                         {/* Navigation link to Notifications */}
                         <NavLink
-                            to="/dashboard/notification"
+                            to="/dashboard/notifications"
                             onClick={(e) => setPageState(e.target.innerText)}
                             className="sidebar-link"
                         >
@@ -111,7 +111,7 @@ const SideNav = () => {
                                     ""
                                 )}
                             </div>
-                            Notification
+                            Notifications
                         </NavLink>
 
                         {/* Navigation link to Write (Editor) */}
