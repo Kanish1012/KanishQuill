@@ -2,6 +2,11 @@ import { useContext, useEffect, useState } from "react";
 import axios from "axios";
 import { UserContext } from "../App";
 import { filterPaginationData } from "../common/filter-pagination-data";
+import Loader from "../components/loader.component";
+import AnimationWrapper from "../common/page-animation";
+import NoDataMessage from "../components/nodata.component";
+import NotificationCard from "../components/notification-card.component";
+import LoadMoreDataBtn from "../components/load-more.component";
 
 const Notifications = () => {
     let {
@@ -34,7 +39,6 @@ const Notifications = () => {
                 });
 
                 setNotifications(formatedData);
-                console.log(formatedData);
             })
             .catch((err) => {
                 console.log(err);
@@ -56,6 +60,7 @@ const Notifications = () => {
     return (
         <div>
             <h1 className="max-md:hidden">Recent Notifications</h1>
+
             <div className="my-8 flex gap-6">
                 {filters.map((filtername, i) => {
                     return (
@@ -74,6 +79,35 @@ const Notifications = () => {
                     );
                 })}
             </div>
+
+            {notifications == null ? (
+                <Loader />
+            ) : (
+                <>
+                    {notifications.results.length ? (
+                        notifications.results.map((notification, i) => {
+                            return (
+                                <AnimationWrapper
+                                    key={i}
+                                    transition={{ delay: i * 0.08 }}
+                                >
+                                    <NotificationCard />
+                                </AnimationWrapper>
+                            );
+                        })
+                    ) : (
+                        <NoDataMessage message="Nothing available" />
+                    )}
+
+                    <LoadMoreDataBtn
+                        state={notifications}
+                        fetchDataFun={fetchNotifications}
+                        additionalParam={{
+                            deletedDocCount: notifications.deletedDocCount,
+                        }}
+                    />
+                </>
+            )}
         </div>
     );
 };
