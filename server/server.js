@@ -709,9 +709,10 @@ server.post("/isliked-by-user", verifyJWT, (req, res) => {
         });
 });
 
+// Endpoint to add a comment
 server.post("/add-comment", verifyJWT, (req, res) => {
     let user_id = req.user;
-    let { _id, comment, blog_author, replying_to } = req.body;
+    let { _id, comment, blog_author, replying_to, notification_id } = req.body;
 
     if (!comment.length) {
         return res.status(403).json({ error: "Write something to comment" });
@@ -767,6 +768,13 @@ server.post("/add-comment", verifyJWT, (req, res) => {
                 notificationObj.notification_for =
                     replyingToCommentDoc.commented_by;
             });
+
+            if (notification_id) {
+                Notification.findOneAndUpdate(
+                    { _id: notification_id },
+                    { reply: commentFile._id }
+                ).then((notification) => console.log("notification updated"));
+            }
         }
 
         return res.status(200).json({

@@ -1,20 +1,32 @@
 import { Link } from "react-router-dom";
 import { getDay } from "../common/date";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import NotificationCommentField from "./notification-comment-field.component";
+import { UserContext } from "../App";
 
 const NotificationCard = ({ data, index, notificationState }) => {
     let [isReplying, setReplying] = useState(false);
     let {
         type,
+        reply,
         createdAt,
         comment,
         replied_on_comment,
-        blog: { blog_id, title },
+        user,
+        blog: { _id, title },
         user: {
             personal_info: { fullname, username, profile_img },
         },
+        _id: notification_id,
     } = data;
+
+    let {
+        userAuth: {
+            username: author_username,
+            profile_img: author_profile_img,
+            access_token,
+        },
+    } = useContext(UserContext);
 
     const handleReplyClick = () => {
         setReplying((prev) => !prev);
@@ -52,7 +64,7 @@ const NotificationCard = ({ data, index, notificationState }) => {
                         </div>
                     ) : (
                         <Link
-                            to={`/blog/${blog_id}`}
+                            to={`/blog/${_id}`}
                             className="font-medium text-dark-grey hover:underline line-clamp-1"
                         >
                             {`${title}`}
@@ -73,12 +85,16 @@ const NotificationCard = ({ data, index, notificationState }) => {
                 <p>{getDay(createdAt)}</p>
                 {type != "like" ? (
                     <>
-                        <button
-                            className="underline hover:text-black"
-                            onClick={handleReplyClick}
-                        >
-                            Reply
-                        </button>
+                        {!reply ? (
+                            <button
+                                className="underline hover:text-black"
+                                onClick={handleReplyClick}
+                            >
+                                Reply
+                            </button>
+                        ) : (
+                            ""
+                        )}
                         <button className="underline hover:text-black">
                             Delelte
                         </button>
@@ -90,7 +106,52 @@ const NotificationCard = ({ data, index, notificationState }) => {
 
             {isReplying ? (
                 <div className="mt-8">
-                    <NotificationCommentField />
+                    <NotificationCommentField
+                        _id={_id}
+                        blog_author={user}
+                        index={index}
+                        replyingTo={comment._id}
+                        setReplying={setReplying}
+                        notification_id={notification_id}
+                        notificationData={notificationState}
+                    />
+                </div>
+            ) : (
+                ""
+            )}
+
+            {reply ? (
+                <div className="ml-20 p-5 bg-grey mt-5 rounded-md">
+                    <div className="flex gap-3 mb-3">
+                        <img
+                            src={author_profile_img}
+                            className="w-8 h-8 rounded-full"
+                        />
+
+                        <div>
+                            <h1 className="font-medium text-xl text-dark-grey">
+                                <Link
+                                    to={`/user/${author_username}`}
+                                    className="mx-1 text-black underline"
+                                >
+                                    @{author_username}
+                                </Link>
+
+                                <span className="font-normal">replied to</span>
+
+                                <Link
+                                    to={`/user/${username}`}
+                                    className="mx-1 text-black underline"
+                                >
+                                    @{username}
+                                </Link>
+                            </h1>
+                        </div>
+                    </div>
+
+                    <p className="ml-14 font-gelasio text-xl my-2">
+                        {reply.comment}
+                    </p>
                 </div>
             ) : (
                 ""
