@@ -14,19 +14,25 @@ const NotificationCommentField = ({
 }) => {
     let [comment, setComment] = useState("");
 
+    // Extract blog author's user ID
     let { _id: user_id } = blog_author;
+
+    // Get access token from user context
     let {
         userAuth: { access_token },
     } = useContext(UserContext);
+
+    // Get notifications and update function from props
     let {
         notifications,
         notifications: { results },
         setNotifications,
     } = notificationData;
 
+    // Submit comment
     const handleComment = () => {
         if (!comment.length) {
-            return toast.error("Write something to comment"); // Show error if comment is empty
+            return toast.error("Write something to comment"); // Show error if empty
         }
 
         // Send comment data to the server
@@ -43,12 +49,12 @@ const NotificationCommentField = ({
                 { headers: { Authorization: `Bearer ${access_token}` } }
             )
             .then(({ data }) => {
-                setReplying(false)
-                results[index].reply = {comment, _id: data._id}
-                setNotifications({...notifications, results})
+                setReplying(false); // Close reply input
+                results[index].reply = { comment, _id: data._id }; // Add reply to notification
+                setNotifications({ ...notifications, results }); // Update state
             })
             .catch((err) => {
-                console.log(err);
+                console.log(err); // Log error
             });
     };
 
@@ -59,9 +65,7 @@ const NotificationCommentField = ({
                 value={comment}
                 placeholder="Leave a reply..."
                 className="input-box pl-5 placeholder:text-dark-grey resize-none h-[150px] overflow-auto"
-                onChange={(e) => {
-                    setComment(e.target.value);
-                }}
+                onChange={(e) => setComment(e.target.value)} // Update comment value
             ></textarea>
             <button className="btn-dark mt-5 px-10" onClick={handleComment}>
                 Reply

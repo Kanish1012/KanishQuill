@@ -1,8 +1,8 @@
-import { useContext, useState } from "react"; // Import necessary hooks
-import { UserContext } from "../App"; // Import UserContext for user authentication
-import toast, { Toaster } from "react-hot-toast"; // Import toast for notifications
-import axios from "axios"; // Import axios for making API requests
-import { BlogContext } from "../pages/blog.page"; // Import BlogContext for blog-related data
+import { useContext, useState } from "react";
+import { UserContext } from "../App";
+import toast, { Toaster } from "react-hot-toast";
+import axios from "axios";
+import { BlogContext } from "../pages/blog.page";
 
 const CommentField = ({
     action,
@@ -10,7 +10,7 @@ const CommentField = ({
     replyingTo = undefined,
     setReplying,
 }) => {
-    // Extract necessary data from BlogContext
+    // Destructure blog and related states from context
     let {
         blog,
         blog: {
@@ -25,24 +25,19 @@ const CommentField = ({
         setTotalParentCommentsLoaded,
     } = useContext(BlogContext);
 
-    // Extract user authentication details from UserContext
+    // Destructure user info from context
     let {
         userAuth: { access_token, username, fullname, profile_img },
     } = useContext(UserContext);
 
-    const [comment, setComment] = useState(""); // State to manage comment input
+    const [comment, setComment] = useState(""); // Comment input state
 
-    // Function to handle comment submission
+    // Handle comment submit
     const handleComment = () => {
-        if (!access_token) {
-            return toast.error("Please login to comment"); // Show error if user is not logged in
-        }
+        if (!access_token) return toast.error("Please login to comment"); // Not logged in
+        if (!comment.length) return toast.error("Write something to comment"); // Empty comment
 
-        if (!comment.length) {
-            return toast.error("Write something to comment"); // Show error if comment is empty
-        }
-
-        // Send comment data to the server
+        // Submit comment
         axios
             .post(
                 import.meta.env.VITE_SERVER_DOMAIN + "/add-comment",
@@ -50,9 +45,7 @@ const CommentField = ({
                 { headers: { Authorization: `Bearer ${access_token}` } }
             )
             .then(({ data }) => {
-                setComment(""); // Clear input field after successful submission
-
-                // Add user info to the new comment data
+                setComment(""); // Clear input
                 data.commented_by = {
                     personal_info: { username, profile_img, fullname },
                 };
@@ -60,7 +53,7 @@ const CommentField = ({
                 let newCommentArr;
 
                 if (replyingTo) {
-                    // Handle replies by updating the parent comment
+                    // Add reply below the parent comment
                     commentsArr[index].children.push(data._id);
                     data.childrenLevel = commentsArr[index].childrenLevel + 1;
                     data.parentIndex = index;
@@ -69,14 +62,12 @@ const CommentField = ({
                     newCommentArr = commentsArr;
                     setReplying(false);
                 } else {
-                    // Add a new parent comment
+                    // Add as a new parent comment
                     data.childrenLevel = 0;
                     newCommentArr = [data, ...commentsArr];
                 }
 
-                let parentCommentIncrementVal = replyingTo ? 0 : 1;
-
-                // Update blog state with the new comment
+                // Update blog state with new comment
                 setBlog({
                     ...blog,
                     comments: { ...comments, results: newCommentArr },
@@ -84,30 +75,26 @@ const CommentField = ({
                         ...activity,
                         total_comments: total_comments + 1,
                         total_parent_comments:
-                            total_parent_comments + parentCommentIncrementVal,
+                            total_parent_comments + (replyingTo ? 0 : 1),
                     },
                 });
 
-                // Update total parent comments count
-                setTotalParentCommentsLoaded(
-                    (preVal) => preVal + parentCommentIncrementVal
-                );
+                // Update loaded parent count if not a reply
+                if (!replyingTo) {
+                    setTotalParentCommentsLoaded((prev) => prev + 1);
+                }
             })
-            .catch((err) => {
-                console.log(err); // Log error if request fails
-            });
+            .catch((err) => console.log(err)); // Log error
     };
 
     return (
         <>
-            <Toaster /> {/* Notification container */}
+            <Toaster /> {/* Toast container */}
             <textarea
                 value={comment}
                 placeholder="Leave a comment..."
                 className="input-box pl-5 placeholder:text-dark-grey resize-none h-[150px] overflow-auto"
-                onChange={(e) => {
-                    setComment(e.target.value); // Update state on input change
-                }}
+                onChange={(e) => setComment(e.target.value)} // Update input
             ></textarea>
             <button className="btn-dark mt-5 px-10" onClick={handleComment}>
                 {action}

@@ -7,6 +7,8 @@ import axios from "axios";
 
 const NotificationCard = ({ data, index, notificationState }) => {
     let [isReplying, setReplying] = useState(false);
+
+    // Destructure data from notification
     let {
         seen,
         type,
@@ -22,6 +24,7 @@ const NotificationCard = ({ data, index, notificationState }) => {
         _id: notification_id,
     } = data;
 
+    // Get current user data
     let {
         userAuth: {
             username: author_username,
@@ -30,36 +33,33 @@ const NotificationCard = ({ data, index, notificationState }) => {
         },
     } = useContext(UserContext);
 
+    // Destructure notification state
     let {
         notifications,
         notifications: { results, totalDocs },
         setNotifications,
     } = notificationState;
 
+    // Toggle reply input visibility
     const handleReplyClick = () => {
         setReplying((prev) => !prev);
     };
 
+    // Handle delete comment/reply
     const handleDelete = (comment_id, type, target) => {
-        target.setAttribute("disabled", true);
+        target.setAttribute("disabled", true); // Disable button during request
 
         axios
             .post(
                 import.meta.env.VITE_SERVER_DOMAIN + "/delete-comment",
-                {
-                    _id: comment_id,
-                },
-                {
-                    headers: {
-                        Authorization: `Bearer ${access_token}`,
-                    },
-                }
+                { _id: comment_id },
+                { headers: { Authorization: `Bearer ${access_token}` } }
             )
             .then(() => {
                 if (type == "comment") {
-                    results.splice(index, 1);
+                    results.splice(index, 1); // Remove entire comment
                 } else {
-                    delete results[index].reply;
+                    delete results[index].reply; // Remove just the reply
                 }
                 target.removeAttribute("disabled");
                 setNotifications({
@@ -72,7 +72,13 @@ const NotificationCard = ({ data, index, notificationState }) => {
     };
 
     return (
-        <div className={"p-6 border-b border-grey border-l-black " +  (!seen ? "border-l-2" : "")}>
+        <div
+            className={
+                "p-6 border-b border-grey border-l-black " +
+                (!seen ? "border-l-2" : "")
+            }
+        >
+            {/* Header section */}
             <div className="flex gap-5 mb-3">
                 <img
                     src={profile_img}
@@ -97,6 +103,8 @@ const NotificationCard = ({ data, index, notificationState }) => {
                                 : "replied on"}
                         </span>
                     </h1>
+
+                    {/* Display parent comment if it's a reply */}
                     {type === "reply" && replied_on_comment ? (
                         <div className="p-4 mt-4 rounded-md bg-grey">
                             <p>{replied_on_comment.comment}</p>
@@ -112,6 +120,7 @@ const NotificationCard = ({ data, index, notificationState }) => {
                 </div>
             </div>
 
+            {/* Show comment text (if not a like) */}
             {type != "like" ? (
                 <p className="ml-14 pl-5 font-gelasio text-xl my-5">
                     {comment.comment}
@@ -120,6 +129,7 @@ const NotificationCard = ({ data, index, notificationState }) => {
                 ""
             )}
 
+            {/* Actions row: time, reply, delete */}
             <div className="ml-14 pl-5 mt-3 text-dark-grey flex gap-8">
                 <p>{getDay(createdAt)}</p>
                 {type != "like" ? (
@@ -140,7 +150,7 @@ const NotificationCard = ({ data, index, notificationState }) => {
                                 handleDelete(comment._id, "comment", e.target)
                             }
                         >
-                            Delelte
+                            Delete
                         </button>
                     </>
                 ) : (
@@ -148,6 +158,7 @@ const NotificationCard = ({ data, index, notificationState }) => {
                 )}
             </div>
 
+            {/* Show reply input field if replying */}
             {isReplying ? (
                 <div className="mt-8">
                     <NotificationCommentField
@@ -164,6 +175,7 @@ const NotificationCard = ({ data, index, notificationState }) => {
                 ""
             )}
 
+            {/* Show reply if exists */}
             {reply ? (
                 <div className="ml-20 p-5 bg-grey mt-5 rounded-md">
                     <div className="flex gap-3 mb-3">
@@ -171,7 +183,6 @@ const NotificationCard = ({ data, index, notificationState }) => {
                             src={author_profile_img}
                             className="w-8 h-8 rounded-full"
                         />
-
                         <div>
                             <h1 className="font-medium text-xl text-dark-grey">
                                 <Link
@@ -180,9 +191,7 @@ const NotificationCard = ({ data, index, notificationState }) => {
                                 >
                                     @{author_username}
                                 </Link>
-
                                 <span className="font-normal">replied to</span>
-
                                 <Link
                                     to={`/user/${username}`}
                                     className="mx-1 text-black underline"

@@ -9,32 +9,35 @@ import NotificationCard from "../components/notification-card.component";
 import LoadMoreDataBtn from "../components/load-more.component";
 
 const Notifications = () => {
+    // Get user auth context
     let {
         userAuth,
         setUserAuth,
         userAuth: { access_token, new_notification_available },
     } = useContext(UserContext);
 
-    const [filter, setFilter] = useState("all");
-    const [notifications, setNotifications] = useState(null);
-    let filters = ["all", "like", "comment", "reply"];
+    const [filter, setFilter] = useState("all"); // Notification type filter
+    const [notifications, setNotifications] = useState(null); // Notification state
+    let filters = ["all", "like", "comment", "reply"]; // Available filter options
 
+    // Fetch notifications from server
     const fetchNotifications = ({ page, deletedDocCount = 0 }) => {
         axios
             .post(
                 import.meta.env.VITE_SERVER_DOMAIN + "/notifications",
                 { page, filter, deletedDocCount },
-                {
-                    headers: {
-                        Authorization: `Bearer ${access_token}`,
-                    },
-                }
+                { headers: { Authorization: `Bearer ${access_token}` } }
             )
             .then(async ({ data: { notifications: data } }) => {
+                // Clear new notification badge if needed
                 if (new_notification_available) {
-                    setUserAuth({...userAuth, new_notification_available: false})
+                    setUserAuth({
+                        ...userAuth,
+                        new_notification_available: false,
+                    });
                 }
 
+                // Format and merge paginated data
                 let formatedData = await filterPaginationData({
                     state: notifications,
                     data,
@@ -51,12 +54,14 @@ const Notifications = () => {
             });
     };
 
+    // Handle filter button click
     const handleFilter = (e) => {
         let btn = e.target;
         setFilter(btn.innerHTML);
-        setNotifications(null);
+        setNotifications(null); // Reset on filter change
     };
 
+    // Fetch notifications on mount or filter change
     useEffect(() => {
         if (access_token) {
             fetchNotifications({ page: 1 });
@@ -67,6 +72,7 @@ const Notifications = () => {
         <div>
             <h1 className="max-md:hidden">Recent Notifications</h1>
 
+            {/* Filter buttons */}
             <div className="my-8 flex gap-6">
                 {filters.map((filtername, i) => {
                     return (
@@ -86,6 +92,7 @@ const Notifications = () => {
                 })}
             </div>
 
+            {/* Show loader, notifications, or fallback */}
             {notifications == null ? (
                 <Loader />
             ) : (
@@ -112,6 +119,7 @@ const Notifications = () => {
                         <NoDataMessage message="Nothing available" />
                     )}
 
+                    {/* Load more button */}
                     <LoadMoreDataBtn
                         state={notifications}
                         fetchDataFun={fetchNotifications}
