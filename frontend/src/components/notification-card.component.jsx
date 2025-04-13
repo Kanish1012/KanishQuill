@@ -3,10 +3,12 @@ import { getDay } from "../common/date";
 import { useContext, useState } from "react";
 import NotificationCommentField from "./notification-comment-field.component";
 import { UserContext } from "../App";
+import axios from "axios";
 
 const NotificationCard = ({ data, index, notificationState }) => {
     let [isReplying, setReplying] = useState(false);
     let {
+        seen,
         type,
         reply,
         createdAt,
@@ -28,12 +30,49 @@ const NotificationCard = ({ data, index, notificationState }) => {
         },
     } = useContext(UserContext);
 
+    let {
+        notifications,
+        notifications: { results, totalDocs },
+        setNotifications,
+    } = notificationState;
+
     const handleReplyClick = () => {
         setReplying((prev) => !prev);
     };
 
+    const handleDelete = (comment_id, type, target) => {
+        target.setAttribute("disabled", true);
+
+        axios
+            .post(
+                import.meta.env.VITE_SERVER_DOMAIN + "/delete-comment",
+                {
+                    _id: comment_id,
+                },
+                {
+                    headers: {
+                        Authorization: `Bearer ${access_token}`,
+                    },
+                }
+            )
+            .then(() => {
+                if (type == "comment") {
+                    results.splice(index, 1);
+                } else {
+                    delete results[index].reply;
+                }
+                target.removeAttribute("disabled");
+                setNotifications({
+                    ...notifications,
+                    results,
+                    totalDocs: totalDocs - 1,
+                    deleteDocCount: notifications.deleteDocCount + 1,
+                });
+            });
+    };
+
     return (
-        <div className="p-6 border-b border-grey border-l-black">
+        <div className={"p-6 border-b border-grey border-l-black " +  (!seen ? "border-l-2" : "")}>
             <div className="flex gap-5 mb-3">
                 <img
                     src={profile_img}
@@ -95,7 +134,12 @@ const NotificationCard = ({ data, index, notificationState }) => {
                         ) : (
                             ""
                         )}
-                        <button className="underline hover:text-black">
+                        <button
+                            className="underline hover:text-black"
+                            onClick={(e) =>
+                                handleDelete(comment._id, "comment", e.target)
+                            }
+                        >
                             Delelte
                         </button>
                     </>
@@ -152,6 +196,15 @@ const NotificationCard = ({ data, index, notificationState }) => {
                     <p className="ml-14 font-gelasio text-xl my-2">
                         {reply.comment}
                     </p>
+
+                    <button
+                        className="underline hover:text-black ml-14 mt-2"
+                        onClick={(e) =>
+                            handleDelete(reply._id, "reply", e.target)
+                        }
+                    >
+                        Delete
+                    </button>
                 </div>
             ) : (
                 ""

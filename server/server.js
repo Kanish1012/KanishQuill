@@ -860,11 +860,12 @@ const deleteComments = (_id) => {
                 }
             );
 
-            Notification.findOneAndDelete({ reply: _id }).then(
-                (notification) => {
-                    console.log("Reply notification deleted");
-                }
-            );
+            Notification.findOneAndUpdate(
+                { reply: _id },
+                { $unset: { reply: 1 } }
+            ).then((notification) => {
+                console.log("Reply notification deleted");
+            });
 
             Blog.findOneAndUpdate(
                 { _id: comment.blog_id },
@@ -964,6 +965,13 @@ server.post("/notifications", verifyJWT, (req, res) => {
         .sort({ createdAt: -1 })
         .select("createdAt type seen reply")
         .then((notifications) => {
+            Notification.updateMany(findQuery, { seen: true })
+                .skip(skipDocs)
+                .limit(maxLimit)
+                .then(() => {
+                    console.log("Notifications marked as seen");
+                });
+
             return res.status(200).json({ notifications });
         })
         .catch((err) => {
