@@ -1000,6 +1000,52 @@ server.post("/all-notifications-count", verifyJWT, (req, res) => {
         });
 });
 
+// Endpoint to get user-written blogs
+server.post("/user-written-blogs", verifyJWT, (req, res) => {
+    let user_id = req.user;
+
+    let { page, draft, query, deletedDocCount } = req.body;
+
+    let maxLimit = 5;
+    let skipDocs = (page - 1) * maxLimit;
+
+    if (deletedDocCount) {
+        skipDocs -= deletedDocCount;
+    }
+
+    Blog.find({ author: user_id, draft, title: new RegExp(query, "i") })
+        .skip(skipDocs)
+        .limit(maxLimit)
+        .sort({ publishedAt: -1 })
+        .select(" title banner publishedAt blog_id activity des draft -_id ")
+        .then((blogs) => {
+            return res.status(200).json({ blogs });
+        })
+        .catch((err) => {
+            return res.status(500).json({ error: err.message });
+        });
+});
+
+// Endpoint to get the count of user-written blogs
+server.post("user-written-blogs-count", verifyJWT, (req, res) => {
+    let user_id = req.user;
+
+    let { draft, query } = req.body;
+
+    Blog.countDocuments({
+        author: user_id,
+        draft,
+        title: new RegExp(query, "i"),
+    })
+        .then((count) => {
+            return res.status(200).json({ totalDocs: count });
+        })
+        .catch((err) => {
+            console.log(err.message);
+            return res.status(500).json({ error: err.message });
+        });
+});
+
 // Start the server
 server.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
