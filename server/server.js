@@ -1027,7 +1027,7 @@ server.post("/user-written-blogs", verifyJWT, (req, res) => {
 });
 
 // Endpoint to get the count of user-written blogs
-server.post("user-written-blogs-count", verifyJWT, (req, res) => {
+server.post("/user-written-blogs-count", verifyJWT, (req, res) => {
     let user_id = req.user;
 
     let { draft, query } = req.body;
