@@ -181,7 +181,7 @@ const BlogPage = () => {
                                             key={i}
                                             transition={{
                                                 duration: 1,
-                                                delay: i * 0.08,
+                                                delay: i * 0.06,
                                             }}
                                         >
                                             <BlogPostCard
