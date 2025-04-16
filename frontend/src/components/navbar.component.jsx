@@ -1,5 +1,6 @@
 import { useContext, useEffect, useState } from "react";
-import logo from "../imgs/logo.png";
+import darklogo from "../imgs/logo-dark.png";
+import lightlogo from "../imgs/logo-light.png";
 import { Link, Outlet, useNavigate } from "react-router-dom";
 import { ThemeContext, UserContext } from "../App";
 import UserNavigationPanel from "./user-navigation.component";
@@ -65,7 +66,7 @@ const Navbar = () => {
         setTheme(newTheme);
         document.body.setAttribute("data-theme", newTheme);
         storeInSession("theme", newTheme);
-    }
+    };
 
     return (
         <>
@@ -73,7 +74,7 @@ const Navbar = () => {
             <nav className="navbar z-50">
                 {/* Logo linking to the home page */}
                 <Link to="/" className="flex-none w-10">
-                    <img src={logo} className="w-full" />
+                    <img src={theme=='light'? darklogo : lightlogo} className="w-full" />
                 </Link>
 
                 {/* Search box */}
@@ -112,8 +113,19 @@ const Navbar = () => {
                         <p>Write</p>
                     </Link>
 
-                    <button className="w-12 h-12 rounded-full bg-grey relative hover:bg-black/10" onClick={changeTheme}>
-                        <i className="fi fi-rr-moon-stars"></i>
+                    {/* Button to toggle theme */}
+                    <button
+                        className="w-12 h-12 rounded-full bg-grey relative hover:bg-black/10 flex items-center justify-center"
+                        onClick={changeTheme}
+                    >
+                        <i
+                            className={
+                                "text-2xl block mt-1fi " +
+                                (theme == "light"
+                                    ? "fi-rr-moon-stars"
+                                    : "fi-rr-sun")
+                            }
+                        ></i>
                     </button>
 
                     {/* Conditional rendering based on authentication */}

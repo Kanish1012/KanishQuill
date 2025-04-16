@@ -18,6 +18,10 @@ import ManageBlogs from "./pages/manage-blogs.page";
 export const UserContext = createContext({});
 export const ThemeContext = createContext({});
 
+const darkthemePreference = () => {
+    return window.matchMedia("(prefers-color-scheme: dark)").matches;
+};
+
 const App = () => {
     const [userAuth, setUserAuth] = useState(() => {
         try {
@@ -31,7 +35,9 @@ const App = () => {
         }
     });
 
-    const [theme, setTheme] = useState("light");
+    const [theme, setTheme] = useState(() =>
+        darkthemePreference() ? "dark" : "light"
+    );
 
     useEffect(() => {
         let userInSession = lookInSession("user");
