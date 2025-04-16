@@ -12,6 +12,7 @@ import {
     ManagePublishedBlogCard,
     ManageDraftBlogPost,
 } from "../components/manage-blogcard.component";
+import LoadMoreDataBtn from "../components/load-more.component";
 
 const ManageBlogs = () => {
     const [blogs, setBlogs] = useState(null);
@@ -123,6 +124,15 @@ const ManageBlogs = () => {
                                     </AnimationWrapper>
                                 );
                             })}
+
+                            <LoadMoreDataBtn
+                                state={blogs}
+                                fetchDataFun={getBlogs}
+                                additionalParam={{
+                                    draft: false,
+                                    deletedDocCount: blogs.deletedDocCount,
+                                }}
+                            />
                         </>
                     ) : (
                         <NoDataMessage message="No published blogs" />
@@ -151,6 +161,15 @@ const ManageBlogs = () => {
                                     </AnimationWrapper>
                                 );
                             })}
+
+                            <LoadMoreDataBtn
+                                state={drafts}
+                                fetchDataFun={getBlogs}
+                                additionalParam={{
+                                    draft: true,
+                                    deletedDocCount: drafts.deletedDocCount,
+                                }}
+                            />
                         </>
                     ) : (
                         <NoDataMessage message="No Draft blogs" />
