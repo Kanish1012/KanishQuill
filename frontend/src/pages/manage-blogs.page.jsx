@@ -8,7 +8,10 @@ import AnimationWrapper from "../common/page-animation";
 import InPageNavigation from "../components/inpage-navigation.component";
 import Loader from "../components/loader.component";
 import NoDataMessage from "../components/nodata.component";
-import ManagePublishedBlogCard from "../components/manage-blogcard.component";
+import {
+    ManagePublishedBlogCard,
+    ManageDraftBlogPost,
+} from "../components/manage-blogcard.component";
 
 const ManageBlogs = () => {
     const [blogs, setBlogs] = useState(null);
@@ -110,13 +113,35 @@ const ManageBlogs = () => {
                                         key={i}
                                         transition={{ delay: i * 0.04 }}
                                     >
-                                        <ManagePublishedBlogCard />
+                                        <ManagePublishedBlogCard blog={blog} />
                                     </AnimationWrapper>
                                 );
                             })}
                         </>
                     ) : (
                         <NoDataMessage message="No published blogs" />
+                    )
+                }
+
+                {
+                    // Draft Blogs
+                    drafts == null ? (
+                        <Loader />
+                    ) : drafts.results.length ? (
+                        <>
+                            {drafts.results.map((blog, i) => {
+                                return (
+                                    <AnimationWrapper
+                                        key={i}
+                                        transition={{ delay: i * 0.04 }}
+                                    >
+                                        <ManageDraftBlogPost blog={blog} index={i}/>
+                                    </AnimationWrapper>
+                                );
+                            })}
+                        </>
+                    ) : (
+                        <NoDataMessage message="No Draft blogs" />
                     )
                 }
             </InPageNavigation>
