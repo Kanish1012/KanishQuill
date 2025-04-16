@@ -14,12 +14,6 @@ import aws from "aws-sdk";
 import Notification from "./Schema/Notification.js";
 import Comment from "./Schema/Comment.js";
 import { populate } from "dotenv";
-import fs from "fs/promises";
-
-// Load Firebase admin SDK JSON manually
-const serviceAccountKey = JSON.parse(
-  await fs.readFile("./blog-website-kanish-firebase-adminsdk-ru7wg-389fd6b277.json", "utf8")
-);
 
 const server = express();
 let PORT = 3000;
