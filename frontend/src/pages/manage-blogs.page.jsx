@@ -70,7 +70,7 @@ const ManageBlogs = () => {
 
         setQuery(searchQuery);
 
-        if (e.KeyCode == 13 && searchQuery.length) {
+        if (e.key === "Enter" && searchQuery.length) {
             setBlogs(null);
             setDrafts(null);
         }
@@ -113,7 +113,13 @@ const ManageBlogs = () => {
                                         key={i}
                                         transition={{ delay: i * 0.04 }}
                                     >
-                                        <ManagePublishedBlogCard blog={blog} />
+                                        <ManagePublishedBlogCard
+                                            blog={{
+                                                ...blog,
+                                                index: i,
+                                                setStateFun: setDrafts,
+                                            }}
+                                        />
                                     </AnimationWrapper>
                                 );
                             })}
@@ -135,7 +141,13 @@ const ManageBlogs = () => {
                                         key={i}
                                         transition={{ delay: i * 0.04 }}
                                     >
-                                        <ManageDraftBlogPost blog={blog} index={i}/>
+                                        <ManageDraftBlogPost
+                                            blog={{
+                                                ...blog,
+                                                index: i,
+                                                setStateFun: setDrafts,
+                                            }}
+                                        />
                                     </AnimationWrapper>
                                 );
                             })}

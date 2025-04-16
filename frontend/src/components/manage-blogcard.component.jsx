@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { getDay } from "../common/date";
-import { useState } from "react";
+import { useContext, useState } from "react";
+import { UserContext } from "../App";
 
 const BlogStats = ({ stats }) => {
     return (
@@ -30,6 +31,9 @@ const BlogStats = ({ stats }) => {
 export const ManagePublishedBlogCard = ({ blog }) => {
     const { banner, blog_id, title, publishedAt, activity } = blog;
     const [showStat, setShowStat] = useState(false);
+    let {
+        userAuth: { access_token },
+    } = useContext(UserContext);
 
     return (
         <div className="mb-6 border-b border-grey">
@@ -68,7 +72,10 @@ export const ManagePublishedBlogCard = ({ blog }) => {
                             Stats
                         </button>
 
-                        <button className="pr-4 py-2 underline text-red">
+                        <button
+                            className="pr-4 py-2 underline text-red"
+                            onClick={() => deleteBlog(blog, access_token, e)}
+                        >
                             Delete
                         </button>
                     </div>
@@ -90,10 +97,44 @@ export const ManagePublishedBlogCard = ({ blog }) => {
     );
 };
 
-export const ManageDraftBlogPost = ({blog, index})=>{
-    return(
-        <h1>Draft Blog</h1>
-    )
-}
+export const ManageDraftBlogPost = ({ blog }) => {
+    let { title, des, blog_id, index } = blog;
+    let {
+        userAuth: { access_token },
+    } = useContext(UserContext);
 
+    index++;
 
+    return (
+        <div className="flex gap-5 lg:gap-10 pb-6 border-b mb-6 border-grey">
+            <h1 className="blog-index text-center pl-4 md:pl-6 flex-none">
+                {index < 10 ? "0" + index : index}
+            </h1>
+
+            <div>
+                <h1 className="blog-title mb-3">{title}</h1>
+                <p className="line-clamp-2 font-gelasio">
+                    {des.length ? des : "No Description"}
+                </p>
+
+                <div className="flex gap-6 mt-3">
+                    <Link
+                        to={`/editor/${blog_id}`}
+                        className="pr-4 py-2 underline"
+                    >
+                        Edit
+                    </Link>
+
+                    <button
+                        className="pr-4 py-2 underline text-red"
+                        onClick={() => deleteBlog(blog, access_token, e)}
+                    >
+                        Delete
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+const deleteBlog = (blog, access_token, target) => {};

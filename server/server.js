@@ -1046,6 +1046,37 @@ server.post("/user-written-blogs-count", verifyJWT, (req, res) => {
         });
 });
 
+// Endpoint to delete a blog post
+server.post("/delete-blog", verifyJWT, (req, res) => {
+    let user_id = req.user;
+    let { blog_id } = req.body;
+
+    Blog.findOneAndDelete({ blog_id })
+        .then((blog) => {
+            Notification.deleteMany({ blog: blog._id }).then((data) => {
+                console.log("Notification deleted");
+            });
+            Comment.deleteMany({ blog_id: blog._id }).then((data) => {
+                console.log("Comment deleted");
+            });
+            User.findOneAndUpdate(
+                { _id: user_id },
+                {
+                    $pull: { blog: blog._id },
+                    $inc: { "account_info.total_posts": -1 },
+                }
+            ).then((user) => {
+                console.log("Blog deleted from user account");
+            });
+
+            return res.status(200).json({ status: "done" });
+        })
+        .catch((err) => {
+            console.log(err.message);
+            return res.status(500).json({ error: err.message });
+        });
+});
+
 // Start the server
 server.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
