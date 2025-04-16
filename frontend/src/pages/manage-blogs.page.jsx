@@ -117,7 +117,7 @@ const ManageBlogs = () => {
                                             blog={{
                                                 ...blog,
                                                 index: i,
-                                                setStateFun: setDrafts,
+                                                setStateFunc: setBlogs,
                                             }}
                                         />
                                     </AnimationWrapper>
@@ -145,7 +145,7 @@ const ManageBlogs = () => {
                                             blog={{
                                                 ...blog,
                                                 index: i,
-                                                setStateFun: setDrafts,
+                                                setStateFunc: setDrafts,
                                             }}
                                         />
                                     </AnimationWrapper>

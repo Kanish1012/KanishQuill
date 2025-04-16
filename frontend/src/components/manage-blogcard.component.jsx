@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { getDay } from "../common/date";
 import { useContext, useState } from "react";
 import { UserContext } from "../App";
+import axios from "axios";
 
 const BlogStats = ({ stats }) => {
     return (
@@ -74,7 +75,7 @@ export const ManagePublishedBlogCard = ({ blog }) => {
 
                         <button
                             className="pr-4 py-2 underline text-red"
-                            onClick={() => deleteBlog(blog, access_token, e)}
+                            onClick={(e) => deleteBlog(blog, access_token, e.target)}
                         >
                             Delete
                         </button>
@@ -127,7 +128,7 @@ export const ManageDraftBlogPost = ({ blog }) => {
 
                     <button
                         className="pr-4 py-2 underline text-red"
-                        onClick={() => deleteBlog(blog, access_token, e)}
+                        onClick={(e) => deleteBlog(blog, access_token, e.target)}
                     >
                         Delete
                     </button>
@@ -137,4 +138,44 @@ export const ManageDraftBlogPost = ({ blog }) => {
     );
 };
 
-const deleteBlog = (blog, access_token, target) => {};
+const deleteBlog = (blog, access_token, target) => {
+    let { index, blog_id, setStateFunc } = blog;
+
+    target.setAttribute("disabled", true);
+
+    axios
+        .post(
+            import.meta.env.VITE_SERVER_DOMAIN + "/delete-blog",
+            { blog_id },
+            {
+                headers: {
+                    Authorization: `Bearer ${access_token}`,
+                },
+            }
+        )
+        .then(({ data }) => {
+            target.removeAttribute("disabled");
+            setStateFunc((preVal) => {
+                let { deletedDocCount, totalDocs, results } = preVal;
+                results.splice(index, 1);
+
+                if (!deletedDocCount) {
+                    deletedDocCount = 0;
+                }
+
+                if (!results.length && totalDocs - 1 > 0) {
+                    return null;
+                }
+
+                return {
+                    ...preVal,
+                    totalDocs: totalDocs - 1,
+                    deletedDocCount: deletedDocCount + 1,
+                    results,
+                };
+            });
+        })
+        .catch((err) => {
+            console.error("Error deleting blog:", err);
+        });
+};
