@@ -1,13 +1,16 @@
 import { useContext, useEffect, useState } from "react";
 import logo from "../imgs/logo.png";
 import { Link, Outlet, useNavigate } from "react-router-dom";
-import { UserContext } from "../App";
+import { ThemeContext, UserContext } from "../App";
 import UserNavigationPanel from "./user-navigation.component";
 import axios from "axios";
+import { storeInSession } from "../common/session";
 
 const Navbar = () => {
     const [searchBoxVisibility, setSearchBoxVisibility] = useState(false);
     const [userNavPanel, setUserNavPanel] = useState(false);
+
+    let { theme, setTheme } = useContext(ThemeContext);
 
     let navigate = useNavigate();
 
@@ -56,6 +59,14 @@ const Navbar = () => {
         }, 200);
     };
 
+    // Changes the theme of the application
+    const changeTheme = () => {
+        let newTheme = theme === "light" ? "dark" : "light";
+        setTheme(newTheme);
+        document.body.setAttribute("data-theme", newTheme);
+        storeInSession("theme", newTheme);
+    }
+
     return (
         <>
             {/* Main navigation bar */}
@@ -100,6 +111,10 @@ const Navbar = () => {
                         <i className="fi fi-rr-file-edit"></i>
                         <p>Write</p>
                     </Link>
+
+                    <button className="w-12 h-12 rounded-full bg-grey relative hover:bg-black/10" onClick={changeTheme}>
+                        <i className="fi fi-rr-moon-stars"></i>
+                    </button>
 
                     {/* Conditional rendering based on authentication */}
                     {access_token ? (
