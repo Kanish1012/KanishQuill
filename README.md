@@ -18,9 +18,10 @@
 
 ## 🧰 Tech Stack
 
-- **Frontend:** React, HTML5, CSS3, Tailwind
-- **Backend:** Node.js, Express.js
-- **Database:** MongoDB (Mongoose for modeling)
+- Frontend: React, HTML5, CSS3, Tailwind
+- Backend: Node.js, Express.js
+- Database: MongoDB (Mongoose for modeling)
+- AWS for storing blog images
 
 
 Clone the Repository and in terminal run:
