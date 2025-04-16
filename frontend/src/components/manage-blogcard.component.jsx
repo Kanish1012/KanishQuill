@@ -4,6 +4,7 @@ import { useContext, useState } from "react";
 import { UserContext } from "../App";
 import axios from "axios";
 
+// Renders individual blog statistics (views, likes, etc.)
 const BlogStats = ({ stats }) => {
     return (
         <div className="flex gap-2 max-lg:mb-6 max-lg:pb-6 border-grey max-lg:border-b">
@@ -29,6 +30,7 @@ const BlogStats = ({ stats }) => {
     );
 };
 
+// Card for managing published blogs
 export const ManagePublishedBlogCard = ({ blog }) => {
     const { banner, blog_id, title, publishedAt, activity } = blog;
     const [showStat, setShowStat] = useState(false);
@@ -75,18 +77,22 @@ export const ManagePublishedBlogCard = ({ blog }) => {
 
                         <button
                             className="pr-4 py-2 underline text-red"
-                            onClick={(e) => deleteBlog(blog, access_token, e.target)}
+                            onClick={(e) =>
+                                deleteBlog(blog, access_token, e.target)
+                            }
                         >
                             Delete
                         </button>
                     </div>
                 </div>
 
+                {/* Show stats on large screens */}
                 <div className="max-lg:hidden">
                     <BlogStats stats={activity} />
                 </div>
             </div>
 
+            {/* Toggle stats on small screens */}
             {showStat ? (
                 <div className="lg:hidden">
                     <BlogStats stats={activity} />
@@ -98,6 +104,7 @@ export const ManagePublishedBlogCard = ({ blog }) => {
     );
 };
 
+// Card for managing draft blogs
 export const ManageDraftBlogPost = ({ blog }) => {
     let { title, des, blog_id, index } = blog;
     let {
@@ -128,7 +135,9 @@ export const ManageDraftBlogPost = ({ blog }) => {
 
                     <button
                         className="pr-4 py-2 underline text-red"
-                        onClick={(e) => deleteBlog(blog, access_token, e.target)}
+                        onClick={(e) =>
+                            deleteBlog(blog, access_token, e.target)
+                        }
                     >
                         Delete
                     </button>
@@ -138,6 +147,7 @@ export const ManageDraftBlogPost = ({ blog }) => {
     );
 };
 
+// Handles blog deletion and updates state accordingly
 const deleteBlog = (blog, access_token, target) => {
     let { index, blog_id, setStateFunc } = blog;
 
@@ -163,6 +173,7 @@ const deleteBlog = (blog, access_token, target) => {
                     deletedDocCount = 0;
                 }
 
+                // Return null to trigger refetch if needed
                 if (!results.length && totalDocs - 1 > 0) {
                     return null;
                 }

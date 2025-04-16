@@ -1,6 +1,5 @@
 import axios from "axios";
-import { useContext, useEffect } from "react";
-import { useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { UserContext } from "../App";
 import { filterPaginationData } from "../common/filter-pagination-data";
 import { Toaster } from "react-hot-toast";
@@ -15,14 +14,16 @@ import {
 import LoadMoreDataBtn from "../components/load-more.component";
 
 const ManageBlogs = () => {
-    const [blogs, setBlogs] = useState(null);
-    const [drafts, setDrafts] = useState(null);
-    const [query, setQuery] = useState("");
+    const [blogs, setBlogs] = useState(null); // State for published blogs
+    const [drafts, setDrafts] = useState(null); // State for draft blogs
+    const [query, setQuery] = useState(""); // Search query state
 
+    // Access token from context
     let {
         userAuth: { access_token },
     } = useContext(UserContext);
 
+    // Fetch blogs or drafts from server
     const getBlogs = ({ page, draft, deletedDocCount = 0 }) => {
         axios
             .post(
@@ -35,6 +36,7 @@ const ManageBlogs = () => {
                 }
             )
             .then(async ({ data }) => {
+                // Format and set fetched data
                 let formatedData = await filterPaginationData({
                     state: draft ? drafts : blogs,
                     data: data.blogs,
@@ -55,6 +57,7 @@ const ManageBlogs = () => {
             });
     };
 
+    // Initial data fetch on component mount
     useEffect(() => {
         if (access_token) {
             if (blogs === null) {
@@ -66,17 +69,19 @@ const ManageBlogs = () => {
         }
     }, [access_token, blogs, drafts, query]);
 
+    // Handle search input on key press
     const handleSearch = (e) => {
         let searchQuery = e.target.value;
-
         setQuery(searchQuery);
 
+        // Trigger search on Enter key
         if (e.key === "Enter" && searchQuery.length) {
             setBlogs(null);
             setDrafts(null);
         }
     };
 
+    // Reset search on empty input
     const handleChange = (e) => {
         if (!e.target.value.length) {
             setQuery("");
@@ -90,6 +95,7 @@ const ManageBlogs = () => {
             <h1 className="max-md:hidden">Manage Blogs</h1>
             <Toaster />
 
+            {/* Search Input */}
             <div className="relative max-md:mt-5 md:mt-8 mb-10">
                 <input
                     type="search"
@@ -101,80 +107,71 @@ const ManageBlogs = () => {
                 <i className="fi fi-rr-search absolute right-[10%] md:pointer-events-none md:left-5 top-1/2 -translate-y-1/2 text-xl text-dark-grey"></i>
             </div>
 
+            {/* Tab Navigation for Published and Drafts */}
             <InPageNavigation routes={["Published Blogs", "Drafts"]}>
-                {
-                    // Published Blogs
-                    blogs == null ? (
-                        <Loader />
-                    ) : blogs.results.length ? (
-                        <>
-                            {blogs.results.map((blog, i) => {
-                                return (
-                                    <AnimationWrapper
-                                        key={i}
-                                        transition={{ delay: i * 0.04 }}
-                                    >
-                                        <ManagePublishedBlogCard
-                                            blog={{
-                                                ...blog,
-                                                index: i,
-                                                setStateFunc: setBlogs,
-                                            }}
-                                        />
-                                    </AnimationWrapper>
-                                );
-                            })}
+                {/* Published Blogs Section */}
+                {blogs == null ? (
+                    <Loader />
+                ) : blogs.results.length ? (
+                    <>
+                        {blogs.results.map((blog, i) => (
+                            <AnimationWrapper
+                                key={i}
+                                transition={{ delay: i * 0.04 }}
+                            >
+                                <ManagePublishedBlogCard
+                                    blog={{
+                                        ...blog,
+                                        index: i,
+                                        setStateFunc: setBlogs,
+                                    }}
+                                />
+                            </AnimationWrapper>
+                        ))}
+                        <LoadMoreDataBtn
+                            state={blogs}
+                            fetchDataFun={getBlogs}
+                            additionalParam={{
+                                draft: false,
+                                deletedDocCount: blogs.deletedDocCount,
+                            }}
+                        />
+                    </>
+                ) : (
+                    <NoDataMessage message="No published blogs" />
+                )}
 
-                            <LoadMoreDataBtn
-                                state={blogs}
-                                fetchDataFun={getBlogs}
-                                additionalParam={{
-                                    draft: false,
-                                    deletedDocCount: blogs.deletedDocCount,
-                                }}
-                            />
-                        </>
-                    ) : (
-                        <NoDataMessage message="No published blogs" />
-                    )
-                }
-
-                {
-                    // Draft Blogs
-                    drafts == null ? (
-                        <Loader />
-                    ) : drafts.results.length ? (
-                        <>
-                            {drafts.results.map((blog, i) => {
-                                return (
-                                    <AnimationWrapper
-                                        key={i}
-                                        transition={{ delay: i * 0.04 }}
-                                    >
-                                        <ManageDraftBlogPost
-                                            blog={{
-                                                ...blog,
-                                                index: i,
-                                                setStateFunc: setDrafts,
-                                            }}
-                                        />
-                                    </AnimationWrapper>
-                                );
-                            })}
-
-                            <LoadMoreDataBtn
-                                state={drafts}
-                                fetchDataFun={getBlogs}
-                                additionalParam={{
-                                    draft: true,
-                                    deletedDocCount: drafts.deletedDocCount,
-                                }}
-                            />
-                        </>
-                    ) : (
-                        <NoDataMessage message="No Draft blogs" />
-                    )
-                }
+                {/* Draft Blogs Section */}
+                {drafts == null ? (
+                    <Loader />
+                ) : drafts.results.length ? (
+                    <>
+                        {drafts.results.map((blog, i) => (
+                            <AnimationWrapper
+                                key={i}
+                                transition={{ delay: i * 0.04 }}
+                            >
+                                <ManageDraftBlogPost
+                                    blog={{
+                                        ...blog,
+                                        index: i,
+                                        setStateFunc: setDrafts,
+                                    }}
+                                />
+                            </AnimationWrapper>
+                        ))}
+                        <LoadMoreDataBtn
+                            state={drafts}
+                            fetchDataFun={getBlogs}
+                            additionalParam={{
+                                draft: true,
+                                deletedDocCount: drafts.deletedDocCount,
+                            }}
+                        />
+                    </>
+                ) : (
+                    <NoDataMessage message="No Draft blogs" />
+                )}
             </InPageNavigation>
         </>
     );
