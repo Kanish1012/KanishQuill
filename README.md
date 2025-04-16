@@ -27,6 +27,7 @@ Clone the Repository and in terminal run:
 npm install (in both /frontend and /server)
 
 create a .env file in server folder and add these with your MongoDB address and keys :
+
 DB_LOCATION=
 
 SECRET_ACCESS_KEY=
