@@ -44,7 +44,7 @@ const UserNavigationPanel = () => {
                 </Link>
 
                 {/* Link to the user's blog dashboard */}
-                <Link to="/dashboard/blog" className="link pl-8 py-4">
+                <Link to="/dashboard/blogs" className="link pl-8 py-4">
                     Dashboard
                 </Link>
 

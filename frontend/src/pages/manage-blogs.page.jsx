@@ -12,11 +12,14 @@ import {
     ManageDraftBlogPost,
 } from "../components/manage-blogcard.component";
 import LoadMoreDataBtn from "../components/load-more.component";
+import { useSearchParams } from "react-router-dom";
 
 const ManageBlogs = () => {
     const [blogs, setBlogs] = useState(null); // State for published blogs
     const [drafts, setDrafts] = useState(null); // State for draft blogs
     const [query, setQuery] = useState(""); // Search query state
+
+    let activeTab = useSearchParams()[0].get('tab')
 
     // Access token from context
     let {
@@ -108,7 +111,7 @@ const ManageBlogs = () => {
             </div>
 
             {/* Tab Navigation for Published and Drafts */}
-            <InPageNavigation routes={["Published Blogs", "Drafts"]}>
+            <InPageNavigation routes={["Published Blogs", "Drafts"]} defaultActiveIndex={activeTab != 'draft' ? 0 : 1}>
                 {/* Published Blogs Section */}
                 {blogs == null ? (
                     <Loader />
