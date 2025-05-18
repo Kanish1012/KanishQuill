@@ -27,6 +27,17 @@
 Clone the Repository and in terminal run:
 npm install (in both /frontend and /server)
 
+create a .env file in frontend folder and add these:
+
+VITE_SERVER_DOMAIN=http://localhost:3000
+
+VITE_FIREBASE_API_KEY=
+VITE_FIREBASE_AUTH_DOMAIN=
+VITE_FIREBASE_PROJECT_ID=
+VITE_FIREBASE_STORAGE_BUCKET=
+VITE_FIREBASE_MESSAGING_SENDER_ID=
+VITE_FIREBASE_APP_ID=
+
 create a .env file in server folder and add these with your MongoDB address and keys :
 
 DB_LOCATION=
